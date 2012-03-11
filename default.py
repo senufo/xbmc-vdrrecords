@@ -11,6 +11,7 @@ import xbmcaddon
 
 import sys
 import os
+import os.path
 import re
 import time
 import md5
@@ -47,64 +48,38 @@ TYPES = {'categories' :{
         "Divertissement":"/emissions-tv/video-integrale/",
         "Sports":"/sport/video-integrale/"
         }}
-# utility functions
-def parameters_string_to_dict(parameters):
-    ''' Convert parameters encoded in a URL to a dict. '''
-    paramDict = {}
-    if parameters:
-        paramPairs = parameters[1:].split("&")
-        for paramsPair in paramPairs:
-            paramSplits = paramsPair.split('=')
-            if (len(paramSplits)) == 2:
-                paramDict[paramSplits[0]] = paramSplits[1]
-    return paramDict
-
-
-def addDirectoryItem(name, isFolder=True, parameters={}):
+def addDir(name,url,mode,iconimage):
+#def addDirectoryItem(name, isFolder=True, parameters={}):
     ''' Add a list item to the XBMC UI.'''
     isFolder=False
     li = xbmcgui.ListItem(name)
     li.setInfo( type="Video", infoLabels={ "Title": name })
     #url = sys.argv[0] + '?' + urllib.urlencode(parameters)
-    url = sys.argv[0] + '?' + '/video/France_4/2011-09-02.09.50.36-0.rec/00001.ts' 
-    #return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url, listitem=li, isFolder=isFolder)
+    url = sys.argv[0] + '?' + url + '/00001.ts' 
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=False)
-
-def addDir(name,url,mode,iconimage):
-    u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"name="+urllib.quote_plus(name)
-    ok=True
-    liz=xbmcgui.ListItem(name, iconImage="DefaultFolder.png",thumbnailImage=iconimage)
-    liz.setInfo( type="Video", infoLabels={ "Title": name })
-    ok=xbmcplugin.addDirectory(handle=int(sys.argv[1]),url=u,listitem=liz,isFolder=True)
-    return ok
 
 # UI builder functions
 def show_root_menu():
     ''' Show the plugin root menu. '''
-    addDirectoryItem(name=FIRST_SUBMENU, parameters={ PARAMETER_KEY_MODE: MODE_FIRST }, isFolder=True)
-    addDirectoryItem(name=SECOND_SUBMENU, parameters={ PARAMETER_KEY_MODE: MODE_SECOND }, isFolder=True)
-    addDirectoryItem(name="Sous menu 3", parameters={ PARAMETER_KEY_MODE: 30 }, isFolder=True)
+    path = '/video/'
+    for root, dirs, files in os.walk(path): 
+        #print "root = %s " % root
+        #print "dirs = %s " % dirs
+        #print "files = %s " % files
+        if 'info' in files :
+            print root
+            titres = root.split('/')
+            print 'Titres = %s' % titres[-2]
+ 
+            addDir(titres[-2], root, 1, "icon.png")
+    #addDirectoryItem(name=SECOND_SUBMENU, parameters={ PARAMETER_KEY_MODE: MODE_SECOND }, isFolder=True)
     xbmcplugin.endOfDirectory(handle=handle, succeeded=True)
     
-def show_first_submenu():
-    ''' Show first submenu. '''
-    for i in range(0, 5):
-        name = "%s Item %d" % (FIRST_SUBMENU, i)
-        addDirectoryItem(name, isFolder=False)
-    xbmcplugin.endOfDirectory(handle=handle, succeeded=True)
-
-def show_second_submenu():
-    ''' Show second submenu. '''
-    for i in range(0, 10):
-        name = "%s Item %d" % (SECOND_SUBMENU, i)
-        addDirectoryItem(name, isFolder=False)
-    xbmcplugin.endOfDirectory(handle=handle, succeeded=True)
-
 # parameter values
-params = parameters_string_to_dict(sys.argv[2])
-mode = int(params.get(PARAMETER_KEY_MODE, "0"))
-#mode = 0
+#params = parameters_string_to_dict(sys.argv[2])
+#mode = int(params.get(PARAMETER_KEY_MODE, "0"))
+mode = 0
 print "##########################################################"
 print("Mode: %s" % mode)
 print "##########################################################"
@@ -119,11 +94,7 @@ else:
     file = string.replace(sys.argv[2], '?', '')
     print "FILE = %s " % file
     xbmc.Player().play(file)
-#elif mode == MODE_FIRST:
-#    ok = show_first_submenu()
-#elif mode == MODE_SECOND:
-#    ok = show_second_submenu()
-################################################################################
+###############################################################################
 # BEGIN !
 ################################################################################
 
