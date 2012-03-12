@@ -13,22 +13,14 @@ import sys
 import os
 import os.path
 import re
-import time
-import md5
 import string
+
 # plugin modes
 MODE_FILE = 1
 MODE_FOLDER = 10
 
-# parameter keys
-PARAMETER_KEY_MODE = "mode"
-
-# menu item names
-FIRST_SUBMENU = "First Submenu"
-SECOND_SUBMENU = "Second Submenu"
 # plugin handle
 handle = int(sys.argv[1])
-
 
 addon	= xbmcaddon.Addon(__addonID__)	
 ROOTDIR            = addon.getAddonInfo('path')
@@ -39,16 +31,8 @@ __settings__ = xbmcaddon.Addon(__addonID__)
 __language__ = __settings__.getLocalizedString
 DEBUG = __settings__.getSetting( "debug" ) == "true"
 
-TYPES = {'categories' :{
-        "JT":"/programmes-tv-info/video-integrale/",
-        "Magazines":"/magazine/video-integrale/",
-        "Séries - Fictions":"/series-tv/video-integrale/",
-        "Jeux":"/jeux-tv/video-integrale/",
-        "Jeunesse":"/programmes-tv-jeunesse/video-integrale/",
-        "Divertissement":"/emissions-tv/video-integrale/",
-        "Sports":"/sport/video-integrale/"
-        }}
 # utility functions
+# parse parameters for the menu
 def parameters_string_to_dict(parameters):
     ''' Convert parameters encoded in a URL to a dict. '''
     paramDict = {}
@@ -60,33 +44,28 @@ def parameters_string_to_dict(parameters):
                 paramDict[paramSplits[0]] = paramSplits[1]
     return paramDict
 
-
-def addFile(name,url='xx',mode=1,iconimage='icon.png', isFolder=False):
-#def addDirectoryItem(name, isFolder=True, parameters={}):
+#Add a file in list
+def addFile(name,url,mode=1,iconimage='icon.png', isFolder=False):
     ''' Add a list item to the XBMC UI.'''
     #isFolder=False
-    #u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"name="+urllib.quote_plus(name)
     li = xbmcgui.ListItem(name)
     li.setInfo( type="Video", infoLabels={ "Title": name })
-    #url = sys.argv[0] + '?' + urllib.urlencode(parameters)
     url = sys.argv[0] + '?url=' + url + '/00001.ts' +"&mode=" + str(mode) 
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
-
+#Add FOLDER in list
 def addDir(name,url='xx',mode=1,iconimage='icon.png', isFolder=False):
-#def addDirectoryItem(name, isFolder=True, parameters={}):
     ''' Add a list item to the XBMC UI.'''
     #isFolder=False
     li = xbmcgui.ListItem(name)
     li.setInfo( type="Video", infoLabels={ "Title": name })
-    #url = sys.argv[0] + '?' + urllib.urlencode(parameters)
     url = sys.argv[0] + '?url=' + url + '&mode=' + str(mode) 
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
 
 
 # UI builder functions
-def show_root_menu(path, racine='video'):
+def show_menu(path, racine='video'):
     ''' Show the plugin root menu. '''
     #path = '/video/'
     print "path = %s " % path
@@ -97,22 +76,23 @@ def show_root_menu(path, racine='video'):
         #print "dirs = %s " % dirs
         #print "files = %s " % files
         try: 
-            #print dirs[0]
+            #On recherhce les réperotires de VDR de la forme
+            # 2011-02-10.20.30.42-0.rec
             if re.search('\d{4}-\d{2}-\d{2}\.', dirs[0]):
+                #On décompose le chemin complet
                 titres = root.split('/')
                 #print "-1 = %s, -2 = %s " % (titres[-1],titres[-2])
                 #if 'video' in titres[-2]:
+                #Si racine correspond à -2 c'est la fin du chemin
                 if racine in titres[-2]:
-                    path = root + '/' + dirs[0]
-                    #print 'PATH = %s ' % path
                     Folder = False
                     tree = {'root': root, 'dirs': dirs, 'files': files, 'Folder':
                             Folder}
                     listRecords.append(tree)
-                    #addDir(titres[-1], path, 1, "icon.png")
-                    #print "not folder"
                 else:
+                    #Sinon c'est un répertoire
                     isFolder = True
+                    #On test si c'est la 1ere fois que l'on voit ce répertoire
                     if titres[-2] in Folders:
                         Folder = titres[-2]
                      #   print "Folder = %s " % Folder
@@ -123,14 +103,12 @@ def show_root_menu(path, racine='video'):
                         tree = {'root': root, 'dirs': dirs, 'files': files, 'Folder':
                             Folder}
                         listRecords.append(tree)
-
-                    #addDir(titres[-2], root, 1, "icon.png", isFolder=True)
-                    #print "Folder = %s " % titres[-2]
         except:
+            #Erreur ce n'est pas un répertoire VDR
             pass
+    #On affice la liste
     for record in listRecords:
         print "==> %s " % record
-        #print "Folder = %s " % record['Folder']
         if record['Folder']:
             titres = record['root'].split('/')
             #print 'Titres = %s' % titres[-2]
@@ -145,7 +123,6 @@ def show_root_menu(path, racine='video'):
             print 'Titres = %s' % titres[-1]
             name = re.sub(r'%|@','',titres[-1])
             addFile(name, chemin, 1, "icon.png", isFolder=False)
-                #addDir(titres[-2], root, 1, "icon.png", isFolder=False)
  
         #if 'info' in files :
         #    print root
@@ -171,7 +148,7 @@ params = parameters_string_to_dict(sys.argv[2])
 if not sys.argv[2]:
     # new start
     path = '/video/'
-    ok = show_root_menu(path)
+    ok = show_menu(path)
 elif int(params['mode']) == MODE_FILE:
     print "mode = %s " % params['mode']
     print "url = %s " % params['url']
@@ -181,14 +158,12 @@ elif int(params['mode']) == MODE_FILE:
     print "FILE = %s " % file
     xbmc.Player().play(params['url'])
 elif int(params['mode']) == MODE_FOLDER:
-    print "FOLDER"
-    print "mode = %s " % params['mode']
-    print "url = %s " % params['url']
+    #print "mode = %s " % params['mode']
+    #print "url = %s " % params['url']
     path = params['url']
     rep = path.split('/')
-    print "-1 = %s, -2 = %s" % (rep[-1],rep[-2])
-    print "PATH => %s " % path
-    ok = show_root_menu(path, racine=rep[-1])
+    #print "PATH => %s " % path
+    ok = show_menu(path, racine=rep[-1])
 
 ###############################################################################
 # BEGIN !
