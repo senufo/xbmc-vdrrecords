@@ -17,8 +17,8 @@ import time
 import md5
 import string
 # plugin modes
-MODE_FIRST = 10
-MODE_SECOND = 20
+MODE_FILE = 1
+MODE_FOLDER = 10
 
 # parameter keys
 PARAMETER_KEY_MODE = "mode"
@@ -48,6 +48,31 @@ TYPES = {'categories' :{
         "Divertissement":"/emissions-tv/video-integrale/",
         "Sports":"/sport/video-integrale/"
         }}
+# utility functions
+def parameters_string_to_dict(parameters):
+    ''' Convert parameters encoded in a URL to a dict. '''
+    paramDict = {}
+    if parameters:
+        paramPairs = parameters[1:].split("&")
+        for paramsPair in paramPairs:
+            paramSplits = paramsPair.split('=')
+            if (len(paramSplits)) == 2:
+                paramDict[paramSplits[0]] = paramSplits[1]
+    return paramDict
+
+
+def addFile(name,url='xx',mode=1,iconimage='icon.png', isFolder=False):
+#def addDirectoryItem(name, isFolder=True, parameters={}):
+    ''' Add a list item to the XBMC UI.'''
+    #isFolder=False
+    #u=sys.argv[0]+"?url="+urllib.quote_plus(url)+"&mode="+str(mode)+"name="+urllib.quote_plus(name)
+    li = xbmcgui.ListItem(name)
+    li.setInfo( type="Video", infoLabels={ "Title": name })
+    #url = sys.argv[0] + '?' + urllib.urlencode(parameters)
+    url = sys.argv[0] + '?url=' + url + '/00001.ts' +"&mode=" + str(mode) 
+    return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
+                                       listitem=li, isFolder=isFolder)
+
 def addDir(name,url='xx',mode=1,iconimage='icon.png', isFolder=False):
 #def addDirectoryItem(name, isFolder=True, parameters={}):
     ''' Add a list item to the XBMC UI.'''
@@ -55,18 +80,20 @@ def addDir(name,url='xx',mode=1,iconimage='icon.png', isFolder=False):
     li = xbmcgui.ListItem(name)
     li.setInfo( type="Video", infoLabels={ "Title": name })
     #url = sys.argv[0] + '?' + urllib.urlencode(parameters)
-    url = sys.argv[0] + '?' + url + '/00001.ts' 
+    url = sys.argv[0] + '?url=' + url + '&mode=' + str(mode) 
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
 
+
 # UI builder functions
-def show_root_menu():
+def show_root_menu(path, racine='video'):
     ''' Show the plugin root menu. '''
-    path = '/video/'
+    #path = '/video/'
+    print "path = %s " % path
     listRecords = []
     Folders = []
     for root, dirs, files in os.walk(path): 
-        #print "root = %s " % root
+        print "root = %s " % root
         #print "dirs = %s " % dirs
         #print "files = %s " % files
         try: 
@@ -74,7 +101,8 @@ def show_root_menu():
             if re.search('\d{4}-\d{2}-\d{2}\.', dirs[0]):
                 titres = root.split('/')
                 #print "-1 = %s, -2 = %s " % (titres[-1],titres[-2])
-                if 'video' in titres[-2]:
+                #if 'video' in titres[-2]:
+                if racine in titres[-2]:
                     path = root + '/' + dirs[0]
                     #print 'PATH = %s ' % path
                     Folder = False
@@ -106,15 +134,17 @@ def show_root_menu():
         if record['Folder']:
             titres = record['root'].split('/')
             #print 'Titres = %s' % titres[-2]
+            print 'record FOLDER = %s' % record
+            folder = '/'.join(titres[:-1])
             name = re.sub(r'%|@','',titres[-2])
-            addDir(name, isFolder=True)
+            addDir(name, folder, mode=10, isFolder=True)
         else:
             chemin = '%s/%s' % (record['root'],record['dirs'][0])
             print "Chemin = %s " % chemin
             titres = record['root'].split('/')
             print 'Titres = %s' % titres[-1]
             name = re.sub(r'%|@','',titres[-1])
-            addDir(name, chemin, 1, "icon.png", isFolder=False)
+            addFile(name, chemin, 1, "icon.png", isFolder=False)
                 #addDir(titres[-2], root, 1, "icon.png", isFolder=False)
  
         #if 'info' in files :
@@ -127,23 +157,39 @@ def show_root_menu():
     xbmcplugin.endOfDirectory(handle=handle, succeeded=True)
     
 # parameter values
-#params = parameters_string_to_dict(sys.argv[2])
+params = parameters_string_to_dict(sys.argv[2])
 #mode = int(params.get(PARAMETER_KEY_MODE, "0"))
-mode = 0
+#mode = 0
 print "##########################################################"
-print("Mode: %s" % mode)
+#print("Mode: %s" % mode)
+print "arg0 = %s, arg1 = %s , arg2 = %s " % (sys.argv[0],sys.argv[1], sys.argv[2])
 print "##########################################################"
 
 # Depending on the mode, call the appropriate function to build the UI.
-print "arg0 = %s, arg1 = %s , arg2 = %s " % (sys.argv[0],sys.argv[1], sys.argv[2])
+#print "arg0 = %s, arg1 = %s , arg2 = %s " % (sys.argv[0],sys.argv[1], sys.argv[2])
+params = parameters_string_to_dict(sys.argv[2])
 if not sys.argv[2]:
     # new start
-    ok = show_root_menu()
-else:
+    path = '/video/'
+    ok = show_root_menu(path)
+elif int(params['mode']) == MODE_FILE:
+    print "mode = %s " % params['mode']
+    print "url = %s " % params['url']
     file = sys.argv[2]
     file = string.replace(sys.argv[2], '?', '')
+
     print "FILE = %s " % file
-    xbmc.Player().play(file)
+    xbmc.Player().play(params['url'])
+elif int(params['mode']) == MODE_FOLDER:
+    print "FOLDER"
+    print "mode = %s " % params['mode']
+    print "url = %s " % params['url']
+    path = params['url']
+    rep = path.split('/')
+    print "-1 = %s, -2 = %s" % (rep[-1],rep[-2])
+    print "PATH => %s " % path
+    ok = show_root_menu(path, racine=rep[-1])
+
 ###############################################################################
 # BEGIN !
 ################################################################################
