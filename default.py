@@ -48,31 +48,81 @@ TYPES = {'categories' :{
         "Divertissement":"/emissions-tv/video-integrale/",
         "Sports":"/sport/video-integrale/"
         }}
-def addDir(name,url,mode,iconimage):
+def addDir(name,url='xx',mode=1,iconimage='icon.png', isFolder=False):
 #def addDirectoryItem(name, isFolder=True, parameters={}):
     ''' Add a list item to the XBMC UI.'''
-    isFolder=False
+    #isFolder=False
     li = xbmcgui.ListItem(name)
     li.setInfo( type="Video", infoLabels={ "Title": name })
     #url = sys.argv[0] + '?' + urllib.urlencode(parameters)
     url = sys.argv[0] + '?' + url + '/00001.ts' 
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
-                                       listitem=li, isFolder=False)
+                                       listitem=li, isFolder=isFolder)
 
 # UI builder functions
 def show_root_menu():
     ''' Show the plugin root menu. '''
     path = '/video/'
+    listRecords = []
+    Folders = []
     for root, dirs, files in os.walk(path): 
         #print "root = %s " % root
         #print "dirs = %s " % dirs
         #print "files = %s " % files
-        if 'info' in files :
-            print root
-            titres = root.split('/')
-            print 'Titres = %s' % titres[-2]
+        try: 
+            #print dirs[0]
+            if re.search('\d{4}-\d{2}-\d{2}\.', dirs[0]):
+                titres = root.split('/')
+                #print "-1 = %s, -2 = %s " % (titres[-1],titres[-2])
+                if 'video' in titres[-2]:
+                    path = root + '/' + dirs[0]
+                    #print 'PATH = %s ' % path
+                    Folder = False
+                    tree = {'root': root, 'dirs': dirs, 'files': files, 'Folder':
+                            Folder}
+                    listRecords.append(tree)
+                    #addDir(titres[-1], path, 1, "icon.png")
+                    #print "not folder"
+                else:
+                    isFolder = True
+                    if titres[-2] in Folders:
+                        Folder = titres[-2]
+                     #   print "Folder = %s " % Folder
+                    else:
+                        Folder = titres[-2]
+                        #print "Append Folder = %s " % Folder
+                        Folders.append(titres[-2])
+                        tree = {'root': root, 'dirs': dirs, 'files': files, 'Folder':
+                            Folder}
+                        listRecords.append(tree)
+
+                    #addDir(titres[-2], root, 1, "icon.png", isFolder=True)
+                    #print "Folder = %s " % titres[-2]
+        except:
+            pass
+    for record in listRecords:
+        print "==> %s " % record
+        #print "Folder = %s " % record['Folder']
+        if record['Folder']:
+            titres = record['root'].split('/')
+            #print 'Titres = %s' % titres[-2]
+            name = re.sub(r'%|@','',titres[-2])
+            addDir(name, isFolder=True)
+        else:
+            chemin = '%s/%s' % (record['root'],record['dirs'][0])
+            print "Chemin = %s " % chemin
+            titres = record['root'].split('/')
+            print 'Titres = %s' % titres[-1]
+            name = re.sub(r'%|@','',titres[-1])
+            addDir(name, chemin, 1, "icon.png", isFolder=False)
+                #addDir(titres[-2], root, 1, "icon.png", isFolder=False)
  
-            addDir(titres[-2], root, 1, "icon.png")
+        #if 'info' in files :
+        #    print root
+        #    titres = root.split('/')
+        #    print 'Titres = %s' % titres[-2]
+        #    name = re.sub(r'%|@','',titres[-2])
+            #addDir(name, root, 1, "icon.png")
     #addDirectoryItem(name=SECOND_SUBMENU, parameters={ PARAMETER_KEY_MODE: MODE_SECOND }, isFolder=True)
     xbmcplugin.endOfDirectory(handle=handle, succeeded=True)
     
