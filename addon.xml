@@ -16,6 +16,8 @@
     <summary>Plugin for view vdr records</summary>
     <summary lang="fr">Regarder les vidéos de VDR</summary>
     <description>view vdr records</description>
-    <description lang="fr">Regarder les vidéos de VDR</description>
+    <description lang="fr">Regarder les vidéos de VDR
+Ce plugin permet de voir depuis le menu vidéo les enregistrements de VDR en tenant compte du controle parental
+    </description>
   </extension>
 </addon>
