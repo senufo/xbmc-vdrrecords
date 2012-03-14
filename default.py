@@ -12,6 +12,7 @@ import xbmcaddon
 import sys
 import os
 import os.path
+import glob
 import re
 import string
 
@@ -45,12 +46,13 @@ def parameters_string_to_dict(parameters):
     return paramDict
 
 #Add a file in list
-def addFile(name,url,mode=1,iconimage='icon.png', isFolder=False):
+def addFile(name,url,mode=1,iconimage='icon.png', isProtect=False):
     ''' Add a list item to the XBMC UI.'''
-    #isFolder=False
+    isFolder=False
     li = xbmcgui.ListItem(name)
     li.setInfo( type="Video", infoLabels={ "Title": name })
-    url = sys.argv[0] + '?url=' + url + '/00001.ts' +"&mode=" + str(mode) 
+    #url = sys.argv[0] + '?url=' + url + '/00001.ts' + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
+    url = sys.argv[0] + '?url=' + url + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
 #Add FOLDER in list
@@ -76,7 +78,7 @@ def show_menu(path, racine='video'):
         #print "dirs = %s " % dirs
         #print "files = %s " % files
         try: 
-            #On recherhce les réperotires de VDR de la forme
+            #On recherche les répertoires de VDR de la forme
             # 2011-02-10.20.30.42-0.rec
             if re.search('\d{4}-\d{2}-\d{2}\.', dirs[0]):
                 #On décompose le chemin complet
@@ -86,6 +88,8 @@ def show_menu(path, racine='video'):
                 #Si racine correspond à -2 c'est la fin du chemin
                 if racine in titres[-2]:
                     Folder = False
+                    #protection.fsk
+                    files = os.listdir('%s/%s' % (root,dirs[0]))
                     tree = {'root': root, 'dirs': dirs, 'files': files, 'Folder':
                             Folder}
                     listRecords.append(tree)
@@ -106,7 +110,7 @@ def show_menu(path, racine='video'):
         except:
             #Erreur ce n'est pas un répertoire VDR
             pass
-    #On affice la liste
+    #On affiche la liste
     for record in listRecords:
         print "==> %s " % record
         if record['Folder']:
@@ -122,7 +126,11 @@ def show_menu(path, racine='video'):
             titres = record['root'].split('/')
             print 'Titres = %s' % titres[-1]
             name = re.sub(r'%|@','',titres[-1])
-            addFile(name, chemin, 1, "icon.png", isFolder=False)
+            if 'protection.fsk' in '/'.join(record['files']):
+                isProtect = True
+            else:
+                isProtect = False
+            addFile(name, chemin, 1, "icon.png", isProtect)
  
         #if 'info' in files :
         #    print root
@@ -152,14 +160,36 @@ if not sys.argv[2]:
 elif int(params['mode']) == MODE_FILE:
     print "mode = %s " % params['mode']
     print "url = %s " % params['url']
-    file = sys.argv[2]
-    file = string.replace(sys.argv[2], '?', '')
-
+    print "protect = %s " % params['protect']
+    if params['protect']:
+        xbmc.executebuiltin("XBMC.Notification(%s,%s)"%("Protection Parentale","Protection"))
     print "FILE = %s " % file
-    xbmc.Player().play(params['url'])
+    #print 'arg_3 = %s ' % sys.argv[3]
+    windowed = True
+    listitem = xbmcgui.ListItem(params['title'])
+    listitem.setInfo('video', {'Title': params['title'], 'Genre': 'Science Fiction'})
+    #xbmc.Player().play( "stack://00001.ts , 00002.ts , 00003.ts" )
+    #xbmc.Player().play(params['url'], listitem)
+    #print "stack:/%s, 00002.ts , 00003.ts" % params['url']
+    files = glob.glob('%s/*.ts' % params['url'])
+    files.sort()
+    print "FILES = %s " % files
+    videos = [ "video/%Superman/2011-03-01.22.08.12-0.rec/00001.ts",
+              "video/%Superman/2011-03-01.22.08.12-0.rec/00002.ts" ]
+    stack = "stack://" + " , ".join( videos )
+    stack = "stack://" + " , ".join( files )
+    print "==> STACK = %s " % stack
+    xbmc.Player().play( stack )
+    #print("stack://video/%Superman/2011-03-01.22.08.12-0.rec/00001.ts, 00002.ts, 00003.ts")
+    
+    #xbmc.Player().play("stack://video/%Superman/2011-03-01.22.08.12-0.rec/00001.ts, 00002.ts")
+    print "FIN SCRIPT================"
+    #xbmc.Player().play(params['url'], listitem, windowed)
+    #xbmc.Player().play(params['url'])
 elif int(params['mode']) == MODE_FOLDER:
     #print "mode = %s " % params['mode']
     #print "url = %s " % params['url']
+    #print "protect = %s " % params['protect']
     path = params['url']
     rep = path.split('/')
     #print "PATH => %s " % path
