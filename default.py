@@ -134,7 +134,9 @@ params = parameters_string_to_dict(sys.argv[2])
 params = parameters_string_to_dict(sys.argv[2])
 if not sys.argv[2]:
     # new start
-    path = '/video/'
+    path = addon.getSetting('dir')
+
+    #path = '/video/'
     ok = show_menu(path)
 elif int(params['mode']) == MODE_FILE:
     #print "mode = %s " % params['mode']
@@ -156,10 +158,15 @@ elif int(params['mode']) == MODE_FILE:
     #On vérifie la protection parentale
     if "True" in params['protect']:
         dialog = xbmcgui.Dialog()
-        pin = dialog.numeric(0, 'Entrez le code parental')
+                #'Entrez le code parental'
+        locstr = addon.getLocalizedString(id=40100) 
+        pin = dialog.numeric(0, locstr)
         print "code = %s " % pin
         if "5536" not in pin:
-            dialog.ok(" Erreur", " Mauvais code ")
+            locstr = addon.getLocalizedString(id=40101)
+            locstr2 = addon.getLocalizedString(id=40102)
+            #         (" Erreur", " Mauvais code ")
+            dialog.ok(locstr, locstr2)
         else:     
             print "FILE = %s " % file
             xbmc.Player().play( stack, listitem )

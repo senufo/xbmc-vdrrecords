@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    
+  <!-- french -->
+  <!-- Script Settings -->
+
+    <string id="30100">Code parental</string>
+    <string id="30101">Debug</string>
+    <string id="30102">Répertoire</string>
+  <!-- Script  msg -->
+    <string id="40100">Entrez le code parental</string>
+    <string id="40101">Erreur</string>
+    <string id="40102">Code faux !!</string>
+</strings>
+
