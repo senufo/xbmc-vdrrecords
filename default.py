@@ -161,6 +161,21 @@ elif int(params['mode']) == MODE_FILE:
     print "mode = %s " % params['mode']
     print "url = %s " % params['url']
     print "protect = %s " % params['protect']
+    pinOk = True
+    windowed = True
+    listitem = xbmcgui.ListItem(params['title'])
+    listitem.setInfo('video', {'Title': params['title'], 'Genre': 'Science Fiction'})
+    #xbmc.Player().play( "stack://00001.ts , 00002.ts , 00003.ts" )
+    #xbmc.Player().play(params['url'], listitem)
+    #print "stack:/%s, 00002.ts , 00003.ts" % params['url']
+    files = glob.glob('%s/*.ts' % params['url'])
+    files.sort()
+    print "FILES = %s " % files
+    videos = [ "video/%Superman/2011-03-01.22.08.12-0.rec/00001.ts",
+              "video/%Superman/2011-03-01.22.08.12-0.rec/00002.ts" ]
+    stack = "stack://" + " , ".join( videos )
+    stack = "stack://" + " , ".join( files )
+    print "==> STACK = %s " % stack
     if "True" in params['protect']:
         #xbmc.executebuiltin("XBMC.Notification(%s,%s)"%("Protection Parentale","Protection"))
         dialog = xbmcgui.Dialog()
@@ -168,30 +183,19 @@ elif int(params['mode']) == MODE_FILE:
         print "code = %s " % pin
         if "5536" not in pin:
             dialog.ok(" Erreur", " Mauvais code ")
+            pinOk = False 
         else:     
             print "FILE = %s " % file
-            #print 'arg_3 = %s ' % sys.argv[3]
-            windowed = True
-            listitem = xbmcgui.ListItem(params['title'])
-            listitem.setInfo('video', {'Title': params['title'], 'Genre': 'Science Fiction'})
-            #xbmc.Player().play( "stack://00001.ts , 00002.ts , 00003.ts" )
-            #xbmc.Player().play(params['url'], listitem)
-            #print "stack:/%s, 00002.ts , 00003.ts" % params['url']
-            files = glob.glob('%s/*.ts' % params['url'])
-            files.sort()
-            print "FILES = %s " % files
-            videos = [ "video/%Superman/2011-03-01.22.08.12-0.rec/00001.ts",
-                  "video/%Superman/2011-03-01.22.08.12-0.rec/00002.ts" ]
-            stack = "stack://" + " , ".join( videos )
-            stack = "stack://" + " , ".join( files )
-            print "==> STACK = %s " % stack
             xbmc.Player().play( stack, listitem )
-            #print("stack://video/%Superman/2011-03-01.22.08.12-0.rec/00001.ts, 00002.ts, 00003.ts")
+    else:
+        xbmc.Player().play( stack, listitem )
+
+        #print("stack://video/%Superman/2011-03-01.22.08.12-0.rec/00001.ts, 00002.ts, 00003.ts")
     
-            #xbmc.Player().play("stack://video/%Superman/2011-03-01.22.08.12-0.rec/00001.ts, 00002.ts")
-            print "FIN SCRIPT================"
-            #xbmc.Player().play(params['url'], listitem, windowed)
-            #xbmc.Player().play(params['url'])
+        #xbmc.Player().play("stack://video/%Superman/2011-03-01.22.08.12-0.rec/00001.ts, 00002.ts")
+        print "FIN SCRIPT================"
+        #xbmc.Player().play(params['url'], listitem, windowed)
+        #xbmc.Player().play(params['url'])
 elif int(params['mode']) == MODE_FOLDER:
     #print "mode = %s " % params['mode']
     #print "url = %s " % params['url']
