@@ -55,6 +55,7 @@ def addFile(name, url, mode=1, iconimage='icon.png', isProtect=False):
     #VideoPlayer.Tagline Small Summary of current playing Video, Critique
     #VideoPlayer.PlotOutline Small Summary of current playing Video, Intrigue
     #VideoPlayer.Plot Complete Text Summary of current playing Video, Résumé 
+    summary = ""
     info_file = open('%s/info' % url, 'r')
     for line in info_file:
         if re.search('^D',line):
@@ -169,9 +170,19 @@ elif int(params['mode']) == MODE_FILE:
         dialog = xbmcgui.Dialog()
                 #'Entrez le code parental'
         locstr = addon.getLocalizedString(id=40100) 
-        pin = dialog.numeric(0, locstr)
+        #pin = dialog.numeric(0, locstr)
+        kb = xbmc.Keyboard('', 'heading', True)
+        kb.setDefault('') # optional
+        kb.setHeading(locstr) # optional
+        kb.setHiddenInput(True) # optional
+        kb.doModal()
+        if (kb.isConfirmed()):
+            pin = kb.getText()
+    
+        password = addon.getSetting('pin')
+
         print "code = %s " % pin
-        if "5536" not in pin:
+        if password not in pin:
             locstr = addon.getLocalizedString(id=40101)
             locstr2 = addon.getLocalizedString(id=40102)
             #         (" Erreur", " Mauvais code ")
