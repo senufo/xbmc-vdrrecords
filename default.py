@@ -52,7 +52,16 @@ def addFile(name, url, mode=1, iconimage='icon.png', isProtect=False):
     ''' Add a list item to the XBMC UI.'''
     isFolder = False
     li = xbmcgui.ListItem(name)
-    li.setInfo( type="Video", infoLabels={ "Title": name })
+    #VideoPlayer.Tagline Small Summary of current playing Video, Critique
+    #VideoPlayer.PlotOutline Small Summary of current playing Video, Intrigue
+    #VideoPlayer.Plot Complete Text Summary of current playing Video, Résumé 
+    info_file = open('%s/info' % url, 'r')
+    for line in info_file:
+        if re.search('^D',line):
+            summary = re.sub("^D ",'',line)
+            summary = re.sub('\|','\n',summary)
+    info_file.close()
+    li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary})
     url = sys.argv[0] + '?url=' + url + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
@@ -147,7 +156,7 @@ elif int(params['mode']) == MODE_FILE:
     listitem = xbmcgui.ListItem(params['title'])
     #remplace _ par des espaces
     titre = params['title'].replace('_',' ')
-    #Permet d'avoir le titre au lieu de 00001.ts
+   #Permet d'avoir le titre au lieu de 00001.ts
     listitem.setInfo('video', {'Title': titre})
     #On regarde combien de fichier ts on a
     files = glob.glob('%s/*.ts' % params['url'])
