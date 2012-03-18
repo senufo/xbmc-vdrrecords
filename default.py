@@ -51,7 +51,10 @@ def parameters_string_to_dict(parameters):
 def addFile(name, url, mode=1, iconimage='icon.png', isProtect=False):
     ''' Add a list item to the XBMC UI.'''
     isFolder = False
-    li = xbmcgui.ListItem(name)
+    #ListItem([label, label2, iconImage, thumbnailImage, path])
+    li = xbmcgui.ListItem(name, 'label2') #,
+                         # '/home/henri/.xbmc/userdata/Thumbnails/Video/0/0a1d1359.tbn',
+                         #'/home/henri/.xbmc/userdata/Thumbnails/Video/0/09f19a67.tbn')
     #VideoPlayer.Tagline Small Summary of current playing Video, Critique
     #VideoPlayer.PlotOutline Small Summary of current playing Video, Intrigue
     #VideoPlayer.Plot Complete Text Summary of current playing Video, Résumé 
