@@ -35,59 +35,6 @@ __settings__ = xbmcaddon.Addon(__addonID__)
 __language__ = __settings__.getLocalizedString
 DEBUG = __settings__.getSetting( "debug" ) == "true"
 
-
-#Variable globales
-(debut,fin,duree) = (0,0,0)
-
-#class VDRPlayer( xbmc.Player ):
-#    def _init_( self, *args ):
-#        print "INIT PLAYER"
-#        pass
-#                    
-#    def onPlayBackStopped( self ):
-#        print( "================> Playback Stopped" )
-#        xbmc.log( "Playback Stopped" )
-#
-#    def onPlayBackEnded( self ):
-#        print( "================> Playback Ended" )
-class VDRPlayer(xbmc.Player) :
-
-    def __init__ (self):
-        #xbmc.Player.__init__(self)
-        pass
-
-    def onPlayBackStarted(self):
-        if xbmc.Player().isPlayingVideo():
-            print "is playing video"
-            debut = time.time()
-            print "Debut =  %s " % debut
-
-    def onPlayBackEnded(self):
-        print "onPlayBackEnded"
-
-    def onPlayBackStopped(self):
-        print "onPlayBackStopped"
-        fin = self.getTime()
-        #fin = time.time()
-        duree = fin - debut
-        print "Debut =  %s, Fin = %s, Duree = %s " % (debut,fin,duree)
-
-    def onPlayBackPaused(self):
-        print "onPlayBackPaused"
-
-    def onPlayBackResumed(self):
-        if xbmc.Player().isPlayingVideo():
-            print "onPlayBackResumed"
-
-#while(1):
-#    if xbmc.Player().isPlaying():
-#        if xbmc.Player().isPlayingVideo():
-#            VIDEO = 1
-#        else:
-#            VIDEO = 0
-#    xbmc.sleep(1000)
-
-                                                                                                                                                                                                                    
 # utility functions
 # parse parameters for the menu
 def parameters_string_to_dict(parameters):
@@ -115,16 +62,16 @@ def addFile(name, url, mode=1, iconimage='icon.png', isProtect=False):
     summary = ""
     info_file = open('%s/info' % url, 'r')
     for line in info_file:
-        if re.search('^D',line):
-            summary = re.sub("^D ",'',line)
-            summary = re.sub('\|','\n',summary)
+        if re.search('^D', line):
+            summary = re.sub("^D ", '', line)
+            summary = re.sub('\|', '\n', summary)
     info_file.close()
     li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary})
     url = sys.argv[0] + '?url=' + url + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
 #Add FOLDER in list
-def addDir(name,url='xx', mode=1, iconimage='icon.png', isFolder=False):
+def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
     ''' Add a folder item to the XBMC UI.'''
     #isFolder=False
     li = xbmcgui.ListItem(name)
@@ -151,7 +98,7 @@ def show_menu(path, racine='video'):
                 #Si racine correspond à -2 c'est la fin du chemin
                 if racine in titres[-2]:
                     Folder = False
-                    files = os.listdir('%s/%s' % (root,dirs[0]))
+                    files = os.listdir('%s/%s' % (root, dirs[0]))
                     tree = {'root': root, 'dirs': dirs, 'files': files, 
                             'Folder': Folder}
                     listRecords.append(tree)
@@ -222,8 +169,6 @@ elif int(params['mode']) == MODE_FILE:
     files.sort()
     stack = "stack://" + " , ".join( files )
     print "==> STACK = %s " % stack
-    #On crée un player
-    MonPlayer = VDRPlayer()
     #On vérifie la protection parentale
     if "True" in params['protect']:
         dialog = xbmcgui.Dialog()
@@ -248,22 +193,14 @@ elif int(params['mode']) == MODE_FILE:
             dialog.ok(locstr, locstr2)
         else:     
             print "FILE = %s " % file
-            #xbmc.executebuiltin( "PlayMedia(%s)" % stack )
-            MonPlayer.play( stack, listitem )
+            xbmc.executebuiltin( "PlayMedia(%s)" % stack) 
+            #MonPlayer.play( stack, listitem )
     else:
-        MonPlayer.play( stack, listitem )
+        #MonPlayer.play( stack, listitem )
         #xbmc.Player().play( stack, listitem )
-        #xbmc.executebuiltin( "PlayMedia(%s)" % stack )
+
+        xbmc.executebuiltin( "PlayMedia(%s)" % stack )
         xbmc.log( "Mon Player" )
-        while(1):
-            if xbmc.Player().isPlaying():
-                    if xbmc.Player().isPlayingVideo():
-                        VIDEO = 1
-                    else:
-                        VIDEO = 0
-            xbmc.sleep(1000)
-
-
         print "FIN SCRIPT================"
 #On a selectionné un dossier
 elif int(params['mode']) == MODE_FOLDER:
