@@ -181,10 +181,41 @@ def show_menu(path, racine='video'):
                 isProtect = True
             else:
                 isProtect = False
-            addFile(name, chemin, 1, "icon.png", isProtect)
+            if CodeParental:
+                addFile(name, chemin, 1, "icon.png", isProtect)
+            elif isProtect:
+                pass
+            else:
+                addFile(name, chemin, 1, "icon.png", isProtect)
  
     xbmcplugin.endOfDirectory(handle=handle, succeeded=True)
-    
+
+#Debut du programme
+###Active la protection
+dialog = xbmcgui.Dialog()
+#'Entrez le code parental'
+locstr = addon.getLocalizedString(id=40100) 
+#pin = dialog.numeric(0, locstr)
+kb = xbmc.Keyboard('', 'heading', True)
+kb.setDefault('') # optional
+kb.setHeading(locstr) # optional
+kb.setHiddenInput(True) # optional
+kb.doModal()
+if (kb.isConfirmed()):
+    pin = kb.getText()
+
+password = addon.getSetting('pin')
+
+print "code = %s " % pin
+if password not in pin:
+    locstr = addon.getLocalizedString(id=40101)
+    locstr2 = addon.getLocalizedString(id=40102)
+    #         (" Erreur", " Mauvais code ")
+    dialog.ok(locstr, locstr2)
+    CodeParental = False
+else:
+    CodeParental = True
+
 # parameter values
 params = parameters_string_to_dict(sys.argv[2])
 
@@ -242,25 +273,25 @@ elif int(params['mode']) == MODE_FILE:
             dialog.ok(locstr, locstr2)
         else:     
             print "FILE = %s " % file
-            xbmc.executebuiltin( "PlayMedia(%s)" % stack) 
+            #xbmc.executebuiltin( "PlayMedia(%s)" % stack) 
             #MonPlayer.play( stack, listitem )
     else:
         #MonPlayer.play( stack, listitem )
         #xbmc.Player().play( stack, listitem )
 
-        xbmc.executebuiltin( "PlayMedia(%s)" % stack )
+        #xbmc.executebuiltin( "PlayMedia(%s)" % stack )
         xbmc.log( "Mon Player" )
-        #while(1):
-        #    if xbmc.Player().isPlaying():
-        #        if xbmc.Player().isPlayingVideo():
-        #            temps = xbmc.Player().getTime() 
-        #            print "TEMPS IF = %s " % temps 
-        #        else:
-        #            print "TEMPS = %s " % temps 
-        #    else:
-        #        print "TEMPS isPlaying= %s " % temps 
-        #        #open(
-        #    xbmc.sleep(1000)
+        while(1):
+            if xbmc.Player().isPlaying():
+                if xbmc.Player().isPlayingVideo():
+                    temps = xbmc.Player().getTime() 
+                    print "TEMPS IF = %s " % temps 
+                else:
+                    print "TEMPS = %s " % temps 
+            else:
+                print "TEMPS isPlaying= %s " % temps 
+                #open(
+            xbmc.sleep(1000)
     print "FIN SCRIPT================"
 #On a selectionné un dossier
 elif int(params['mode']) == MODE_FOLDER:
@@ -288,6 +319,7 @@ if ( __name__ == "__main__" ):
         name = None
         mode = None
         print "sys.arg = %s " % sys.argv[ 1 ]
+
         xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), 
                                  sortMethod=xbmcplugin.SORT_METHOD_LABEL )
         xbmcplugin.endOfDirectory(int(sys.argv[1]))
