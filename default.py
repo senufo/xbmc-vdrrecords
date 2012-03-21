@@ -19,6 +19,9 @@ import re
 import string
 import time
 
+#Variables globales
+
+temps = 0 
 # plugin modes
 MODE_FILE = 1
 MODE_FOLDER = 10
@@ -34,6 +37,34 @@ MEDIA_PATH = os.path.join( BASE_RESOURCE_PATH, "media" )
 __settings__ = xbmcaddon.Addon(__addonID__)
 __language__ = __settings__.getLocalizedString
 DEBUG = __settings__.getSetting( "debug" ) == "true"
+class VDRPlayer(xbmc.Player) :
+
+    def __init__ (self):
+        #xbmc.Player.__init__(self)
+        pass
+    
+    def onPlayBackStarted(self):
+        if xbmc.Player().isPlayingVideo():
+            print "is playing video"
+            debut = time.time()
+            print "Debut =  %s " % debut
+    
+    def onPlayBackEnded(self):
+          print "onPlayBackEnded"
+    
+    def onPlayBackStopped(self):
+        print "onPlayBackStopped"
+        fin = self.getTime()
+        #fin = time.time()
+        duree = fin - debut
+        print "Debut =  %s, Fin = %s, Duree = %s " % (debut,fin,duree)
+    
+    def onPlayBackPaused(self):
+        print "onPlayBackPaused"
+    
+    def onPlayBackResumed(self):
+        if xbmc.Player().isPlayingVideo():
+            print "onPlayBackResumed"
 
 # utility functions
 # parse parameters for the menu
@@ -48,6 +79,16 @@ def parameters_string_to_dict(parameters):
                 paramDict[paramSplits[0]] = paramSplits[1]
     return paramDict
 
+#Test getSTACK
+def getSTACK(url, isProtect):
+    #On regarde combien de fichier ts on a
+    files = glob.glob('%s/*.ts' % url)
+    #On trie l'ordre des fichiers
+    files.sort()
+    stack = "stack://" + " , ".join( files )
+    print "STACK = %s " % stack
+    return stack
+    
 #Add a file in list
 def addFile(name, url, mode=1, iconimage='icon.png', isProtect=False):
     ''' Add a list item to the XBMC UI.'''
@@ -67,7 +108,11 @@ def addFile(name, url, mode=1, iconimage='icon.png', isProtect=False):
             summary = re.sub('\|', '\n', summary)
     info_file.close()
     li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary})
-    url = sys.argv[0] + '?url=' + url + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
+    #url = sys.argv[0] + '?url=' + url + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
+    print "URL = %s " % url 
+    url = getSTACK( url, isProtect )
+    #url = stack + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
+    #url = stack
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
 #Add FOLDER in list
@@ -146,6 +191,10 @@ params = parameters_string_to_dict(sys.argv[2])
 # Depending on the mode, call the appropriate function to build the UI.
 #On recupere les parametres de la listBox
 params = parameters_string_to_dict(sys.argv[2])
+print "#" * 30
+print "sys.argv[2] = %s " % sys.argv[2]
+print "#" * 30
+
 if not sys.argv[2]:
     # new start
     path = addon.getSetting('dir')
@@ -153,9 +202,9 @@ if not sys.argv[2]:
     #path = '/video/'
     ok = show_menu(path)
 elif int(params['mode']) == MODE_FILE:
-    #print "mode = %s " % params['mode']
-    #print "url = %s " % params['url']
-    #print "protect = %s " % params['protect']
+    print "mode = %s " % params['mode']
+    print "url = %s " % params['url']
+    print "protect = %s " % params['protect']
     #windowed true=play video windowed, false=play users  preference
     #windowed = True
     listitem = xbmcgui.ListItem(params['title'])
@@ -201,7 +250,18 @@ elif int(params['mode']) == MODE_FILE:
 
         xbmc.executebuiltin( "PlayMedia(%s)" % stack )
         xbmc.log( "Mon Player" )
-        print "FIN SCRIPT================"
+        #while(1):
+        #    if xbmc.Player().isPlaying():
+        #        if xbmc.Player().isPlayingVideo():
+        #            temps = xbmc.Player().getTime() 
+        #            print "TEMPS IF = %s " % temps 
+        #        else:
+        #            print "TEMPS = %s " % temps 
+        #    else:
+        #        print "TEMPS isPlaying= %s " % temps 
+        #        #open(
+        #    xbmc.sleep(1000)
+    print "FIN SCRIPT================"
 #On a selectionné un dossier
 elif int(params['mode']) == MODE_FOLDER:
     #print "mode = %s " % params['mode']
