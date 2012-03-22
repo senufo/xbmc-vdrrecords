@@ -16,7 +16,7 @@ import os
 import os.path
 import glob
 import re
-import string
+#import string
 import time
 
 #Variables globales
@@ -38,7 +38,9 @@ __settings__ = xbmcaddon.Addon(__addonID__)
 __language__ = __settings__.getLocalizedString
 DEBUG = __settings__.getSetting( "debug" ) == "true"
 class VDRPlayer(xbmc.Player) :
-
+    """"
+    A player adapt to VDR
+    """
     def __init__ (self):
         #xbmc.Player.__init__(self)
         pass
@@ -50,14 +52,14 @@ class VDRPlayer(xbmc.Player) :
             print "Debut =  %s " % debut
     
     def onPlayBackEnded(self):
-          print "onPlayBackEnded"
+        print "onPlayBackEnded"
     
     def onPlayBackStopped(self):
         print "onPlayBackStopped"
         fin = self.getTime()
         #fin = time.time()
         duree = fin - debut
-        print "Debut =  %s, Fin = %s, Duree = %s " % (debut,fin,duree)
+        #print "Debut =  %s, Fin = %s, Duree = %s " % (debut, fin, duree)
     
     def onPlayBackPaused(self):
         print "onPlayBackPaused"
@@ -77,31 +79,35 @@ def parameters_string_to_dict(parameters):
             paramSplits = paramsPair.split('=')
             if (len(paramSplits)) == 2:
                 paramDict[paramSplits[0]] = paramSplits[1]
+                print "paramDict[%s] = %s " % (paramSplits[0], paramSplits[1])
     return paramDict
 
 #Test getSTACK
-def getSTACK(url, isProtect):
+def getSTACK(urlstack):
+    """
+    make a stack for video files
+    """
     #On regarde combien de fichier ts on a
-    files = glob.glob('%s/*.ts' % url)
+    files = glob.glob('%s/*.ts' % urlstack)
     #On trie l'ordre des fichiers
     files.sort()
     stack = "stack://" + " , ".join( files )
-    print "STACK = %s " % stack
+    #print "STACK = %s " % stack
     return stack
     
 #Add a file in list
-def addFile(name, url, mode=1, iconimage='icon.png', isProtect=False):
+def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     ''' Add a list item to the XBMC UI.'''
     isFolder = False
     #ListItem([label, label2, iconImage, thumbnailImage, path])
     li = xbmcgui.ListItem(name, 'label2') #,
-                         # '/home/henri/.xbmc/userdata/Thumbnails/Video/0/0a1d1359.tbn',
-                         #'/home/henri/.xbmc/userdata/Thumbnails/Video/0/09f19a67.tbn')
+           # '/home/henri/.xbmc/userdata/Thumbnails/Video/0/0a1d1359.tbn',
+           #'/home/henri/.xbmc/userdata/Thumbnails/Video/0/09f19a67.tbn')
     #VideoPlayer.Tagline Small Summary of current playing Video, Critique
     #VideoPlayer.PlotOutline Small Summary of current playing Video, Intrigue
     #VideoPlayer.Plot Complete Text Summary of current playing Video, Résumé 
     summary = ""
-    info_file = open('%s/info' % url, 'r')
+    info_file = open('%s/info' % url_file, 'r')
     for line in info_file:
         if re.search('^D', line):
             summary = re.sub("^D ", '', line)
@@ -110,14 +116,19 @@ def addFile(name, url, mode=1, iconimage='icon.png', isProtect=False):
     li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary})
     li.setProperty('IsPlayable', 'true')
     if isProtect:
-        url = sys.argv[0] + '?url=' + url + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
-        url = sys.argv[0] + '?url=' + url
-        print "URL = %s " % url 
+        #url = sys.argv[0] + '?url=' + url + '&title=' + name 
+        #+ "&mode=" + str(mode) + "&protect=" + str(isProtect)
+        #url = sys.argv[0] + '?url=' + url
+        #url = getSTACK( url )
+        url_2 = sys.argv[0] + '?url=' + url_file + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
+        #url_2 = sys.argv[0] + '?url=' + url_file
+        print "URL = %s, url_file => %s " % (url_2, url_file) 
     else:
-        url = getSTACK( url, isProtect )
-    #url = stack + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
+        url_2 = getSTACK( url_file )
+    #url = stack + '&title=' + name + "&mode=" + str(mode) 
+    #+ "&protect=" + str(isProtect)
     #url = stack
-    return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
+    return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url_2,
                                        listitem=li, isFolder=isFolder)
 #Add FOLDER in list
 def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
@@ -171,7 +182,7 @@ def show_menu(path, racine='video'):
         #C'est un répertoire
         if record['Folder']:
             titres = record['root'].split('/')
-            print 'record FOLDER = %s' % record
+            #print 'record FOLDER = %s' % record
             folder = '/'.join(titres[:-1])
             name = re.sub(r'%|@', '', titres[-2])
             addDir(name, folder, mode=10, isFolder=True)
@@ -200,7 +211,7 @@ def show_menu(path, racine='video'):
 dialog = xbmcgui.Dialog()
 #'Entrez le code parental'
 locstr = addon.getLocalizedString(id=40100) 
-#pin = dialog.numeric(0, locstr)
+pin = dialog.numeric(0, locstr)
 kb = xbmc.Keyboard('', 'heading', True)
 kb.setDefault('') # optional
 kb.setHeading(locstr) # optional
@@ -220,6 +231,7 @@ if password not in pin:
     CodeParental = False
 else:
     CodeParental = True
+#CodeParental = True
 
 # parameter values
 params = parameters_string_to_dict(sys.argv[2])
@@ -239,7 +251,7 @@ if not sys.argv[2]:
     ok = show_menu(path)
 elif int(params['mode']) == MODE_FILE:
     #print "mode = %s " % params['mode']
-    #print "url = %s " % params['url']
+    print "url = %s " % params['url']
     #print "protect = %s " % params['protect']
     #windowed true=play video windowed, false=play users  preference
     #windowed = True
@@ -281,7 +293,10 @@ elif int(params['mode']) == MODE_FILE:
             #url = listitem.getPath(path)
             print "=============> %s " % sys.argv[2]
             url = params['url']
-            listitem.setPath(path=url)
+            print "params Url = %s " % url
+            #listitem.setPath(path=url)
+            stack = getSTACK(url)
+            listitem.setPath(stack)
             print "ResolvedUrl = %s " % url
             xbmcplugin.setResolvedUrl(handle, True, listitem)
             #xbmc.executebuiltin( "PlayMedia(%s)" % stack) 
@@ -321,7 +336,7 @@ elif int(params['mode']) == MODE_FOLDER:
 if ( __name__ == "__main__" ):
     try:
         print "==============================="
-        print "  VDR Records - Version: %s"%__version__
+        print "  VDR Records - Version: %s" % __version__
         print "==============================="
         print
 
