@@ -37,36 +37,6 @@ MEDIA_PATH = os.path.join( BASE_RESOURCE_PATH, "media" )
 __settings__ = xbmcaddon.Addon(__addonID__)
 __language__ = __settings__.getLocalizedString
 DEBUG = __settings__.getSetting( "debug" ) == "true"
-class VDRPlayer(xbmc.Player) :
-    """"
-    A player adapt to VDR
-    """
-    def __init__ (self):
-        #xbmc.Player.__init__(self)
-        pass
-    
-    def onPlayBackStarted(self):
-        if xbmc.Player().isPlayingVideo():
-            print "is playing video"
-            debut = time.time()
-            print "Debut =  %s " % debut
-    
-    def onPlayBackEnded(self):
-        print "onPlayBackEnded"
-    
-    def onPlayBackStopped(self):
-        print "onPlayBackStopped"
-        fin = self.getTime()
-        #fin = time.time()
-        duree = fin - debut
-        #print "Debut =  %s, Fin = %s, Duree = %s " % (debut, fin, duree)
-    
-    def onPlayBackPaused(self):
-        print "onPlayBackPaused"
-    
-    def onPlayBackResumed(self):
-        if xbmc.Player().isPlayingVideo():
-            print "onPlayBackResumed"
 
 # utility functions
 # parse parameters for the menu
@@ -116,18 +86,10 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary})
     li.setProperty('IsPlayable', 'true')
     if isProtect:
-        #url = sys.argv[0] + '?url=' + url + '&title=' + name 
-        #+ "&mode=" + str(mode) + "&protect=" + str(isProtect)
-        #url = sys.argv[0] + '?url=' + url
-        #url = getSTACK( url )
         url_2 = sys.argv[0] + '?url=' + url_file + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
-        #url_2 = sys.argv[0] + '?url=' + url_file
         print "URL = %s, url_file => %s " % (url_2, url_file) 
     else:
         url_2 = getSTACK( url_file )
-    #url = stack + '&title=' + name + "&mode=" + str(mode) 
-    #+ "&protect=" + str(isProtect)
-    #url = stack
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url_2,
                                        listitem=li, isFolder=isFolder)
 #Add FOLDER in list
@@ -208,29 +170,29 @@ def show_menu(path, racine='video'):
 
 #Debut du programme
 ###Active la protection
-dialog = xbmcgui.Dialog()
+#dialog = xbmcgui.Dialog()
 #'Entrez le code parental'
-locstr = addon.getLocalizedString(id=40100) 
-pin = dialog.numeric(0, locstr)
-kb = xbmc.Keyboard('', 'heading', True)
-kb.setDefault('') # optional
-kb.setHeading(locstr) # optional
-kb.setHiddenInput(True) # optional
-kb.doModal()
-if (kb.isConfirmed()):
-    pin = kb.getText()
+#locstr = addon.getLocalizedString(id=40100) 
+#pin = dialog.numeric(0, locstr)
+#kb = xbmc.Keyboard('', 'heading', True)
+#kb.setDefault('') # optional
+#kb.setHeading(locstr) # optional
+#kb.setHiddenInput(True) # optional
+#kb.doModal()
+#if (kb.isConfirmed()):
+#    pin = kb.getText()
 
 password = addon.getSetting('pin')
 
-print "code = %s " % pin
-if password not in pin:
-    locstr = addon.getLocalizedString(id=40101)
-    locstr2 = addon.getLocalizedString(id=40102)
+#print "code = %s " % pin
+#if password not in pin:
+#    locstr = addon.getLocalizedString(id=40101)
+#    locstr2 = addon.getLocalizedString(id=40102)
     #         (" Erreur", " Mauvais code ")
-    dialog.ok(locstr, locstr2)
-    CodeParental = False
-else:
-    CodeParental = True
+#    dialog.ok(locstr, locstr2)
+#    CodeParental = False
+#else:
+#    CodeParental = True
 #CodeParental = True
 
 # parameter values
