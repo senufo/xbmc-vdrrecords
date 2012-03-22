@@ -108,9 +108,13 @@ def addFile(name, url, mode=1, iconimage='icon.png', isProtect=False):
             summary = re.sub('\|', '\n', summary)
     info_file.close()
     li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary})
-    #url = sys.argv[0] + '?url=' + url + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
-    print "URL = %s " % url 
-    url = getSTACK( url, isProtect )
+    li.setProperty('IsPlayable', 'true')
+    if isProtect:
+        url = sys.argv[0] + '?url=' + url + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
+        url = sys.argv[0] + '?url=' + url
+        print "URL = %s " % url 
+    else:
+        url = getSTACK( url, isProtect )
     #url = stack + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
     #url = stack
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
@@ -181,6 +185,7 @@ def show_menu(path, racine='video'):
                 isProtect = True
             else:
                 isProtect = False
+            CodeParental = True
             if CodeParental:
                 addFile(name, chemin, 1, "icon.png", isProtect)
             elif isProtect:
@@ -233,9 +238,9 @@ if not sys.argv[2]:
     #path = '/video/'
     ok = show_menu(path)
 elif int(params['mode']) == MODE_FILE:
-    print "mode = %s " % params['mode']
-    print "url = %s " % params['url']
-    print "protect = %s " % params['protect']
+    #print "mode = %s " % params['mode']
+    #print "url = %s " % params['url']
+    #print "protect = %s " % params['protect']
     #windowed true=play video windowed, false=play users  preference
     #windowed = True
     listitem = xbmcgui.ListItem(params['title'])
@@ -244,11 +249,11 @@ elif int(params['mode']) == MODE_FILE:
    #Permet d'avoir le titre au lieu de 00001.ts
     listitem.setInfo('video', {'Title': titre})
     #On regarde combien de fichier ts on a
-    files = glob.glob('%s/*.ts' % params['url'])
+    #files = glob.glob('%s/*.ts' % params['url'])
     #On trie l'ordre des fichiers
-    files.sort()
-    stack = "stack://" + " , ".join( files )
-    print "==> STACK = %s " % stack
+    #files.sort()
+    #stack = "stack://" + " , ".join( files )
+    #print "==> STACK = %s " % stack
     #On vérifie la protection parentale
     if "True" in params['protect']:
         dialog = xbmcgui.Dialog()
@@ -272,14 +277,20 @@ elif int(params['mode']) == MODE_FILE:
             #         (" Erreur", " Mauvais code ")
             dialog.ok(locstr, locstr2)
         else:     
-            print "FILE = %s " % file
+            #print "FILE = %s " % stack
+            #url = listitem.getPath(path)
+            print "=============> %s " % sys.argv[2]
+            url = params['url']
+            listitem.setPath(path=url)
+            print "ResolvedUrl = %s " % url
+            xbmcplugin.setResolvedUrl(handle, True, listitem)
             #xbmc.executebuiltin( "PlayMedia(%s)" % stack) 
             #MonPlayer.play( stack, listitem )
     else:
         #MonPlayer.play( stack, listitem )
         #xbmc.Player().play( stack, listitem )
 
-        #xbmc.executebuiltin( "PlayMedia(%s)" % stack )
+        xbmc.executebuiltin( "PlayMedia(%s)" % stack )
         xbmc.log( "Mon Player" )
         while(1):
             if xbmc.Player().isPlaying():
