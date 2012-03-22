@@ -169,32 +169,7 @@ def show_menu(path, racine='video'):
     xbmcplugin.endOfDirectory(handle=handle, succeeded=True)
 
 #Debut du programme
-###Active la protection
-#dialog = xbmcgui.Dialog()
-#'Entrez le code parental'
-#locstr = addon.getLocalizedString(id=40100) 
-#pin = dialog.numeric(0, locstr)
-#kb = xbmc.Keyboard('', 'heading', True)
-#kb.setDefault('') # optional
-#kb.setHeading(locstr) # optional
-#kb.setHiddenInput(True) # optional
-#kb.doModal()
-#if (kb.isConfirmed()):
-#    pin = kb.getText()
-
 password = addon.getSetting('pin')
-
-#print "code = %s " % pin
-#if password not in pin:
-#    locstr = addon.getLocalizedString(id=40101)
-#    locstr2 = addon.getLocalizedString(id=40102)
-    #         (" Erreur", " Mauvais code ")
-#    dialog.ok(locstr, locstr2)
-#    CodeParental = False
-#else:
-#    CodeParental = True
-#CodeParental = True
-
 # parameter values
 params = parameters_string_to_dict(sys.argv[2])
 
@@ -213,27 +188,19 @@ if not sys.argv[2]:
     ok = show_menu(path)
 elif int(params['mode']) == MODE_FILE:
     #print "mode = %s " % params['mode']
-    print "url = %s " % params['url']
+    #print "url = %s " % params['url']
     #print "protect = %s " % params['protect']
-    #windowed true=play video windowed, false=play users  preference
-    #windowed = True
     listitem = xbmcgui.ListItem(params['title'])
     #remplace _ par des espaces
     titre = params['title'].replace('_',' ')
-   #Permet d'avoir le titre au lieu de 00001.ts
+    #Permet d'avoir le titre au lieu de 00001.ts
     listitem.setInfo('video', {'Title': titre})
-    #On regarde combien de fichier ts on a
-    #files = glob.glob('%s/*.ts' % params['url'])
-    #On trie l'ordre des fichiers
-    #files.sort()
-    #stack = "stack://" + " , ".join( files )
-    #print "==> STACK = %s " % stack
     #On vérifie la protection parentale
     if "True" in params['protect']:
         dialog = xbmcgui.Dialog()
                 #'Entrez le code parental'
         locstr = addon.getLocalizedString(id=40100) 
-        #pin = dialog.numeric(0, locstr)
+        #Clavier virtuel pour mot de passe
         kb = xbmc.Keyboard('', 'heading', True)
         kb.setDefault('') # optional
         kb.setHeading(locstr) # optional
@@ -245,41 +212,29 @@ elif int(params['mode']) == MODE_FILE:
         password = addon.getSetting('pin')
 
         print "code = %s " % pin
+        #Pas le bon MdP
         if password not in pin:
             locstr = addon.getLocalizedString(id=40101)
             locstr2 = addon.getLocalizedString(id=40102)
             #         (" Erreur", " Mauvais code ")
             dialog.ok(locstr, locstr2)
-        else:     
+        else:
+            #Le MdP est correct on joue la video
             #print "FILE = %s " % stack
             #url = listitem.getPath(path)
-            print "=============> %s " % sys.argv[2]
             url = params['url']
             print "params Url = %s " % url
-            #listitem.setPath(path=url)
+
             stack = getSTACK(url)
             listitem.setPath(stack)
             print "ResolvedUrl = %s " % url
             xbmcplugin.setResolvedUrl(handle, True, listitem)
             #xbmc.executebuiltin( "PlayMedia(%s)" % stack) 
-            #MonPlayer.play( stack, listitem )
     else:
-        #MonPlayer.play( stack, listitem )
-        #xbmc.Player().play( stack, listitem )
-
+        #Pas de protection on jous direct
+        #Ne sert pas à effacer
         xbmc.executebuiltin( "PlayMedia(%s)" % stack )
         xbmc.log( "Mon Player" )
-        while(1):
-            if xbmc.Player().isPlaying():
-                if xbmc.Player().isPlayingVideo():
-                    temps = xbmc.Player().getTime() 
-                    print "TEMPS IF = %s " % temps 
-                else:
-                    print "TEMPS = %s " % temps 
-            else:
-                print "TEMPS isPlaying= %s " % temps 
-                #open(
-            xbmc.sleep(1000)
     print "FIN SCRIPT================"
 #On a selectionné un dossier
 elif int(params['mode']) == MODE_FOLDER:
