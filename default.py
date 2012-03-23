@@ -59,6 +59,10 @@ def getSTACK(urlstack):
     """
     #On regarde combien de fichier ts on a
     files = glob.glob('%s/*.ts' % urlstack)
+    print "FILES %s" % files
+    if not files:
+        files = glob.glob('%s/0*.vdr' % urlstack)
+    print "FILES %s" % files
     #On trie l'ordre des fichiers
     files.sort()
     stack = "stack://" + " , ".join( files )
@@ -77,7 +81,10 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     #VideoPlayer.PlotOutline Small Summary of current playing Video, Intrigue
     #VideoPlayer.Plot Complete Text Summary of current playing Video, Résumé 
     summary = ""
-    info_file = open('%s/info' % url_file, 'r')
+    try:
+        info_file = open('%s/info' % url_file, 'r')
+    except:
+        info_file = open('%s/info.vdr' % url_file, 'r')
     for line in info_file:
         if re.search('^D', line):
             summary = re.sub("^D ", '', line)

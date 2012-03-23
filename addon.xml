@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.video.vdrrecords"
        name="VDR Videos"
-       version="0.1.3"
+       version="0.1.4"
        provider-name="senufo">
   <requires>
     <import addon="xbmc.python" version="2.0"/>
@@ -16,8 +16,14 @@
     <summary>Plugin for view vdr records</summary>
     <summary lang="fr">Regarder les vidéos de VDR</summary>
     <description>view vdr records</description>
-    <description lang="fr">Regarder les vidéos de VDR
+    <description lang="fr">
+Regarder les vidéos de VDR
 Ce plugin permet de voir depuis le menu vidéo les enregistrements de VDR en tenant compte du controle parental
+Il supporte les fichiers *.ts (version de VDR > 1.7) et les anciens fichiers *.vdr (version de VDR &lt; 1.7)
+Pour que cela fonctionne correctement avec les anciennes version de VDR il faut ajouter dans advancedsettings.xml
+&lt;videoextensions&gt;
+ &lt;add&gt;.vdr&lt; add&gt;
+&lt;videoextensions&gt;
     </description>
   </extension>
 </addon>
