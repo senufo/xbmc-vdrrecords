@@ -36,7 +36,26 @@ MEDIA_PATH = os.path.join( BASE_RESOURCE_PATH, "media" )
 
 __settings__ = xbmcaddon.Addon(__addonID__)
 __language__ = __settings__.getLocalizedString
+
 DEBUG = __settings__.getSetting( "debug" ) == "true"
+
+
+class Password(xbmcgui.WindowXML):
+    """
+    Clavier pour password
+    """
+    def onInit( self ):
+        """
+        Init Class EPGWIndow
+        """
+        self.password = False
+    
+    def onAction(self, action):
+        """
+        get key for password
+        """
+        print "ID Action %d" % action.getId()
+        print "Code Action %d" % action.getButtonCode()
 
 # utility functions
 # parse parameters for the menu
@@ -94,6 +113,7 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     li.setProperty('IsPlayable', 'true')
     if isProtect:
         url_2 = sys.argv[0] + '?url=' + url_file + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
+        li.setProperty('IsPlayable', 'false')
         print "URL = %s, url_file => %s " % (url_2, url_file) 
     else:
         url_2 = getSTACK( url_file )
@@ -177,6 +197,7 @@ def show_menu(path, racine='video'):
 
 #Debut du programme
 password = addon.getSetting('pin')
+password_ok = True
 # parameter values
 params = parameters_string_to_dict(sys.argv[2])
 
@@ -204,6 +225,9 @@ elif int(params['mode']) == MODE_FILE:
     listitem.setInfo('video', {'Title': titre})
     #On vérifie la protection parentale
     if "True" in params['protect']:
+        #dia_pass = Password('DialogKeyboard.xml',ROOTDIR,"Default")
+        #dia_pass.doModal()
+        #print "Sortie de domodal"
         dialog = xbmcgui.Dialog()
                 #'Entrez le code parental'
         locstr = addon.getLocalizedString(id=40100) 
@@ -219,12 +243,17 @@ elif int(params['mode']) == MODE_FILE:
         password = addon.getSetting('pin')
 
         print "code = %s " % pin
+        print 'sys.argv = %s ' % sys.argv
+        print 'handle = %s ' % handle
         #Pas le bon MdP
         if password not in pin:
             locstr = addon.getLocalizedString(id=40101)
             locstr2 = addon.getLocalizedString(id=40102)
             #         (" Erreur", " Mauvais code ")
             dialog.ok(locstr, locstr2)
+            print "MODE = %s " % params['mode']
+            params['mode'] = MODE_FOLDER
+            print 'sys.argv = %s ' % sys.argv
         else:
             #Le MdP est correct on joue la video
             #print "FILE = %s " % stack
@@ -233,14 +262,25 @@ elif int(params['mode']) == MODE_FILE:
             print "params Url = %s " % url
 
             stack = getSTACK(url)
+            listitem.setProperty('IsPlayable', 'true')
+
             listitem.setPath(stack)
             print "ResolvedUrl = %s " % url
-            xbmcplugin.setResolvedUrl(handle, True, listitem)
+            print 'handle isetResol= %s ' % handle
+            print "266 ================"
+            handle = 0
+            print 'handle setResol modif= %s ' % handle
+            print "==> PlayMedia(%s)" % stack 
+            #xbmcplugin.setResolvedUrl(handle, True, listitem)
+            xbmc.executebuiltin( "PlayMedia(%s)" % stack )
+            print "268 ================"
             #xbmc.executebuiltin( "PlayMedia(%s)" % stack) 
     else:
-        #Pas de protection on jous direct
+        #Pas de protection on joue direct
         #Ne sert pas à effacer
+        print "271 ================"
         xbmc.executebuiltin( "PlayMedia(%s)" % stack )
+        print "273 ================"
         xbmc.log( "Mon Player" )
     print "FIN SCRIPT================"
 #On a selectionné un dossier
@@ -252,6 +292,7 @@ elif int(params['mode']) == MODE_FOLDER:
     rep = path.split('/')
     #print "PATH => %s " % path
     ok = show_menu(path, racine=rep[-1])
+    print "FIN SCRIPT elif================"
 
 ###############################################################################
 # BEGIN !
@@ -269,9 +310,11 @@ if ( __name__ == "__main__" ):
         name = None
         mode = None
         print "sys.arg = %s " % sys.argv[ 1 ]
-
-        xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), 
-                                 sortMethod=xbmcplugin.SORT_METHOD_LABEL )
-        xbmcplugin.endOfDirectory(int(sys.argv[1]))
+        if password_ok == True:
+            xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), 
+                                     sortMethod=xbmcplugin.SORT_METHOD_LABEL )
+            xbmcplugin.endOfDirectory(int(sys.argv[1]))
+        else:
+            print "password_ok = %s " % password_ok
     except:
         print "Erreur"
