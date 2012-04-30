@@ -56,8 +56,8 @@ class Password(xbmcgui.WindowXML):
         """
         get key for password
         """
-        print "ID Action %d" % action.getId()
-        print "Code Action %d" % action.getButtonCode()
+        #print "ID Action %d" % action.getId()
+        #print "Code Action %d" % action.getButtonCode()
         if action.getId() == 58:
             self.password = self.password + '0'
             taille = len(self.password)
@@ -245,9 +245,9 @@ def show_menu(path, racine='video'):
             else:
                 addFile(name, chemin, 1, "icon.png", isProtect)
  
-    xbmcplugin.endOfDirectory(handle=handle, succeeded=True)
+    xbmcplugin.endOfDirectory(handle=int(handle), succeeded=True)
 
-#Debut du programme
+#Debut du prgramme
 password = __addon__.getSetting('pin')
 password_ok = True
 # parameter values
@@ -258,6 +258,8 @@ params = parameters_string_to_dict(sys.argv[2])
 params = parameters_string_to_dict(sys.argv[2])
 print "#" * 30
 print "sys.argv[2] = %s " % sys.argv[2]
+handle = sys.argv[1]
+print "HANDLE = %s " % handle
 print "#" * 30
 
 if not sys.argv[2]:
@@ -284,9 +286,15 @@ elif int(params['mode']) == MODE_FILE:
         locstr = __addon__.getLocalizedString(id=40100) 
         if 1:
             dia_pass = Password('DialogNum.xml', __cwd__ ,"Default")
+            #wid = xbmcgui.getCurrentWindowId()
+            #print 'WID + %d ' % wid
+            #xbmc.executebuiltin('ActivateWindow(%d)' % 999)
+            #wid = xbmcgui.getCurrentWindowId()
+            #print 'WID = %d ' % wid
             dia_pass.doModal()
             print "dia_pass.password %s " % dia_pass.password
             pin = dia_pass.password
+            del dia_pass
             print "Sortie de domodal"
         else:
             #Clavier virtuel pour mot de passe
@@ -301,8 +309,6 @@ elif int(params['mode']) == MODE_FILE:
         password = __addon__.getSetting('pin')
 
         print "code = %s " % pin
-        print 'sys.argv = %s ' % sys.argv
-        print 'handle = %s ' % handle
         #Pas le bon MdP
         if password not in pin:
             locstr = __addon__.getLocalizedString(id=40101)
@@ -331,13 +337,16 @@ elif int(params['mode']) == MODE_FILE:
             print "==> PlayMedia(%s)" % stack 
             #xbmcplugin.setResolvedUrl(handle, True, listitem)
             xbmc.executebuiltin( "PlayMedia(%s)" % stack )
+            #listitem.setInfo('video', {'Title': titre})
+            
             print "268 ================"
             #xbmc.executebuiltin( "PlayMedia(%s)" % stack) 
     else:
         #Pas de protection on joue direct
         #Ne sert pas à effacer
         print "271 ================"
-        xbmc.executebuiltin( "PlayMedia(%s)" % stack )
+        print "==> PlayMedia(%s)" % stack 
+        #xbmc.executebuiltin( "PlayMedia(%s)" % stack )
         print "273 ================"
         xbmc.log( "Mon Player" )
     print "FIN SCRIPT================"
@@ -351,7 +360,8 @@ elif int(params['mode']) == MODE_FOLDER:
     #print "PATH => %s " % path
     ok = show_menu(path, racine=rep[-1])
     print "FIN SCRIPT elif================"
-
+else:
+    print "FIN du IF => ELSE"
 ###############################################################################
 # BEGIN !
 ################################################################################
