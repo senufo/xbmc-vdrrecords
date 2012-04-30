@@ -29,15 +29,17 @@ MODE_FOLDER = 10
 # plugin handle
 handle = int(sys.argv[1])
 
-addon	= xbmcaddon.Addon(__addonID__)	
-ROOTDIR            = addon.getAddonInfo('path')
-BASE_RESOURCE_PATH = os.path.join( ROOTDIR, "resources" )
-MEDIA_PATH = os.path.join( BASE_RESOURCE_PATH, "media" )
+__addon__	= xbmcaddon.Addon(__addonID__)	
+__cwd__        = __addon__.getAddonInfo('path')
+__version__    = __addon__.getAddonInfo('version')
+__language__   = __addon__.getLocalizedString
+ 
+__profile__    = xbmc.translatePath( __addon__.getAddonInfo('profile') )
+__resource__   = xbmc.translatePath( os.path.join( __cwd__, 'resources',
+                                                          'lib' ) )
+sys.path.append (__resource__)
 
-__settings__ = xbmcaddon.Addon(__addonID__)
-__language__ = __settings__.getLocalizedString
-
-DEBUG = __settings__.getSetting( "debug" ) == "true"
+DEBUG = __addon__.getSetting( "debug" ) == "true"
 
 
 class Password(xbmcgui.WindowXML):
@@ -48,7 +50,7 @@ class Password(xbmcgui.WindowXML):
         """
         Init Class EPGWIndow
         """
-        self.password = False
+        self.password = ''
     
     def onAction(self, action):
         """
@@ -56,7 +58,57 @@ class Password(xbmcgui.WindowXML):
         """
         print "ID Action %d" % action.getId()
         print "Code Action %d" % action.getButtonCode()
+        if action.getId() == 58:
+            self.password = self.password + '0'
+            taille = len(self.password)
+            self.getControl(4).setLabel('*' * taille)
+        if action.getId() == 59:
+            self.password = self.password + '1'
+            taille = len(self.password)
+            self.getControl(4).setLabel('*' * taille)
+        if action.getId() == 60 or action.getId() == 142:
+            self.password = self.password + '2'
+            taille = len(self.password)
+            self.getControl(4).setLabel('*' * taille)
+        if action.getId() == 61 or action.getId() == 143:
+            self.password = self.password + '3'
+            taille = len(self.password)
+            self.getControl(4).setLabel('*' * taille)
+        if action.getId() == 62 or action.getId() == 144:
+            self.password = self.password + '4'
+            taille = len(self.password)
+            self.getControl(4).setLabel('*' * taille)
+        if action.getId() == 63 or action.getId() == 145:
+            self.password = self.password + '5'
+            taille = len(self.password)
+            self.getControl(4).setLabel('*' * taille)
+        if action.getId() == 64 or action.getId() == 146:
+            self.password = self.password + '6'
+            taille = len(self.password)
+            self.getControl(4).setLabel('*' * taille)
+        if action.getId() == 65 or action.getId() == 147:
+            self.password = self.password + '7'
+            taille = len(self.password)
+            self.getControl(4).setLabel('*' * taille)
+        if action.getId() == 66 or action.getId() == 148:
+            self.password = self.password + '8'
+            taille = len(self.password)
+            self.getControl(4).setLabel('*' * taille)
+        if action.getId() == 67 or action.getId() == 149:
+            self.password = self.password + '9'
+            taille = len(self.password)
+            self.getControl(4).setLabel('*' * taille)
 
+
+
+    def onClick( self, controlId ):
+        """
+        Actions when mouse click on control
+        """
+        print ( "onClick controId = %d " % controlId)
+        if controlId == 21:
+            print "PASSWORD = %s " % self.password
+            self.close()
 # utility functions
 # parse parameters for the menu
 def parameters_string_to_dict(parameters):
@@ -196,7 +248,7 @@ def show_menu(path, racine='video'):
     xbmcplugin.endOfDirectory(handle=handle, succeeded=True)
 
 #Debut du programme
-password = addon.getSetting('pin')
+password = __addon__.getSetting('pin')
 password_ok = True
 # parameter values
 params = parameters_string_to_dict(sys.argv[2])
@@ -210,7 +262,7 @@ print "#" * 30
 
 if not sys.argv[2]:
     # new start
-    path = addon.getSetting('dir')
+    path = __addon__.getSetting('dir')
 
     #path = '/video/'
     ok = show_menu(path)
@@ -225,30 +277,36 @@ elif int(params['mode']) == MODE_FILE:
     listitem.setInfo('video', {'Title': titre})
     #On vérifie la protection parentale
     if "True" in params['protect']:
-        #dia_pass = Password('DialogKeyboard.xml',ROOTDIR,"Default")
-        #dia_pass.doModal()
-        #print "Sortie de domodal"
+        #Classe Password pour pb visibilité de touche
+        # de la télécommande
         dialog = xbmcgui.Dialog()
                 #'Entrez le code parental'
-        locstr = addon.getLocalizedString(id=40100) 
-        #Clavier virtuel pour mot de passe
-        kb = xbmc.Keyboard('', 'heading', True)
-        kb.setDefault('') # optional
-        kb.setHeading(locstr) # optional
-        kb.setHiddenInput(True) # optional
-        kb.doModal()
-        if (kb.isConfirmed()):
-            pin = kb.getText()
+        locstr = __addon__.getLocalizedString(id=40100) 
+        if 1:
+            dia_pass = Password('DialogNum.xml', __cwd__ ,"Default")
+            dia_pass.doModal()
+            print "dia_pass.password %s " % dia_pass.password
+            pin = dia_pass.password
+            print "Sortie de domodal"
+        else:
+            #Clavier virtuel pour mot de passe
+            kb = xbmc.Keyboard('', 'heading', True)
+            kb.setDefault('') # optional
+            kb.setHeading(locstr) # optional
+            kb.setHiddenInput(True) # optional
+            kb.doModal()
+            if (kb.isConfirmed()):
+                pin = kb.getText()
     
-        password = addon.getSetting('pin')
+        password = __addon__.getSetting('pin')
 
         print "code = %s " % pin
         print 'sys.argv = %s ' % sys.argv
         print 'handle = %s ' % handle
         #Pas le bon MdP
         if password not in pin:
-            locstr = addon.getLocalizedString(id=40101)
-            locstr2 = addon.getLocalizedString(id=40102)
+            locstr = __addon__.getLocalizedString(id=40101)
+            locstr2 = __addon__.getLocalizedString(id=40102)
             #         (" Erreur", " Mauvais code ")
             dialog.ok(locstr, locstr2)
             print "MODE = %s " % params['mode']
