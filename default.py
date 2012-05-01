@@ -336,7 +336,8 @@ elif int(params['mode']) == MODE_FILE:
             print 'handle setResol modif= %s ' % handle
             print "==> PlayMedia(%s)" % stack 
             #xbmcplugin.setResolvedUrl(handle, True, listitem)
-            xbmc.executebuiltin( "PlayMedia(%s)" % stack )
+            #xbmc.executebuiltin( "PlayMedia(%s)" % stack )
+            xbmc.Player().play( stack )
             #listitem.setInfo('video', {'Title': titre})
             
             print "268 ================"
