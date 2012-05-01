@@ -165,7 +165,7 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     li.setProperty('IsPlayable', 'true')
     if isProtect:
         url_2 = sys.argv[0] + '?url=' + url_file + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
-        li.setProperty('IsPlayable', 'false')
+        #li.setProperty('IsPlayable', 'false')
         print "URL = %s, url_file => %s " % (url_2, url_file) 
     else:
         url_2 = getSTACK( url_file )
@@ -284,7 +284,7 @@ elif int(params['mode']) == MODE_FILE:
         dialog = xbmcgui.Dialog()
                 #'Entrez le code parental'
         locstr = __addon__.getLocalizedString(id=40100) 
-        if 1:
+        if 0:
             dia_pass = Password('DialogNum.xml', __cwd__ ,"Default")
             #wid = xbmcgui.getCurrentWindowId()
             #print 'WID + %d ' % wid
@@ -335,8 +335,8 @@ elif int(params['mode']) == MODE_FILE:
             handle = 0
             print 'handle setResol modif= %s ' % handle
             print "==> PlayMedia(%s)" % stack 
-            #xbmcplugin.setResolvedUrl(handle, True, listitem)
-            xbmc.executebuiltin( "PlayMedia(%s)" % stack )
+            xbmcplugin.setResolvedUrl(handle, True, listitem)
+            #xbmc.executebuiltin( "PlayMedia(%s)" % stack )
             #listitem.setInfo('video', {'Title': titre})
             
             print "268 ================"
