@@ -337,8 +337,14 @@ elif int(params['mode']) == MODE_FILE:
             print "==> PlayMedia(%s)" % stack 
             #xbmcplugin.setResolvedUrl(handle, True, listitem)
             #xbmc.executebuiltin( "PlayMedia(%s)" % stack )
-            xbmc.Player().play( stack )
-            #listitem.setInfo('video', {'Title': titre})
+            listitem.setInfo('video', {'Title': titre})
+            # listitem = xbmcgui.ListItem("old title",
+            #                           iconImage="DefaultVideo.png",
+            #                           thumbnailImage=iconimage)
+            # listitem.setInfo('video', {'Title': "old title"})
+            # player = streamplayer(xbmc.PLAYER_CORE_AUTO)
+            # player.play(url, listitem)
+            xbmc.Player().play( stack, listitem )
             
             print "268 ================"
             #xbmc.executebuiltin( "PlayMedia(%s)" % stack) 
