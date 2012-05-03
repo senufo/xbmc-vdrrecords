@@ -40,6 +40,7 @@ __resource__   = xbmc.translatePath( os.path.join( __cwd__, 'resources',
 sys.path.append (__resource__)
 
 DEBUG = __addon__.getSetting( "debug" ) == "true"
+KEYBOARD = __addon__.getSetting( "keyboard" ) == "true"
 
 
 class Password(xbmcgui.WindowXML):
@@ -284,7 +285,7 @@ elif int(params['mode']) == MODE_FILE:
         dialog = xbmcgui.Dialog()
                 #'Entrez le code parental'
         locstr = __addon__.getLocalizedString(id=40100) 
-        if 1:
+        if KEYBOARD:
             dia_pass = Password('DialogNum.xml', __cwd__ ,"Default")
             #wid = xbmcgui.getCurrentWindowId()
             #print 'WID + %d ' % wid
