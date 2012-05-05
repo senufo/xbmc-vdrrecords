@@ -159,10 +159,50 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
         info_file = open('%s/info.vdr' % url_file, 'r')
     for line in info_file:
         if re.search('^D', line):
+            print 'lines = %s' % line
+            realisateur = ''
+            annee = 0
+            category = 'CATEGORY'
+            acteurs = []
+            lines = line.split('|')
+            flag1 = False
+            #Recupere les acteurs
+            for info in lines:
+                if re.match(' \n',info):
+                    flag1 = False
+                if flag1:
+                    acteurs.append(info)
+                if re.match('Acteurs',info) :
+                    flag1 = True
+            for info in lines:
+                #real = re.search('R.alisat... : (\w+ \w+)', info)
+                real = re.search('R.+alis.+ (\w+ \w+)', info)
+                year = re.search('Ann.+e : (\w+)', info)
+                cat = re.search('Cat.+gorie : (\w+)', info)
+                actors = re.search('Avec : (.+)', info)
+                if real:
+                    print 'realisateur = %s' % (real.group(1))
+                    realisateur = real.group(1)
+                else:
+                    print 'INFO = %s ' % info
+                if year:
+                    annee = year.group(1)
+                if cat:
+                    category = cat.group(1)
+                if actors:
+                    print "GROUP = %s " % actors.groups()
+                    acteurs = actors.group(1).split(',')
+                    print "Acteurs = %s, actors = %s " %  (acteurs,actors.group(1))
             summary = re.sub("^D ", '', line)
             summary = re.sub('\|', '\n', summary)
+            #sum_uni = unicode(summary, errors='replace')
     info_file.close()
-    li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary})
+    li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary,
+                                          'director' : realisateur,
+                                          'genre' : category,
+                                          'year' : int(annee),
+                                          'cast' : acteurs})
+    print 'Plot = %s' % summary
     li.setProperty('IsPlayable', 'true')
     if isProtect:
         url_2 = sys.argv[0] + '?url=' + url_file + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
