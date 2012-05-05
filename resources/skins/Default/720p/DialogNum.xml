@@ -1,0 +1,57 @@
+<window id="999">
+	<defaultcontrol always="true">21</defaultcontrol>
+	<include>dialogeffect</include>
+	<coordinates>
+		<system>2</system>
+		<posx>10</posx>
+		<posy>15</posy>
+	</coordinates>
+        <controls>
+              <control type="image">
+	                <description>Cadre du fond</description>
+                        <posx>10</posx>   <!-- position du cadre -->
+                        <posy>10</posy>
+                	<width>1260</width> <!-- Dimension du cadre -->
+                        <height>700</height>
+                        <texture border="40">default-panel.png</texture>
+                	<aspectratio scalediffuse="false" align="center" aligny="top">stretch</aspectratio>
+                </control>
+
+		<control type="label" id="4">
+			<description>Edit Text</description>
+			<posx>500</posx>
+			<posy>50</posy>
+			<width>250</width>
+			<height>50</height>
+			<font>font16caps</font>
+			<textcolor>selected</textcolor>
+			<disabledcolor>grey2</disabledcolor>
+			<align>center</align>
+                        <aligny>center</aligny>
+                        <label>Code ?</label>
+		</control>
+		<control type="group">
+			<posx>550</posx>
+			<posy>155</posy>
+			<control type="button" id="21">
+				<description>Done button</description>
+				<posx>20</posx>
+				<posy>20</posy>
+				<width>120</width>
+				<height>40</height>
+				<font>font12</font>
+				<align>center</align>
+				<aligny>center</aligny>
+                                <!--<texturenofocus flipx="true" border="5,5,25,25">KeyboardCornerBottomNF.png</texturenofocus>
+                                <texturefocus flipx="true" border="5,30,25,25">KeyboardCornerBottom.png</texturefocus> -->
+				<textwidth>120</textwidth>
+				<label>20177</label>
+				<focusedcolor>black</focusedcolor>
+				<onleft>19</onleft>
+				<onright>17</onright>
+				<onup>23</onup>
+				<ondown>23</ondown>
+			</control>
+		</control>
+	</controls>
+</window>
