@@ -178,7 +178,7 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
                 #real = re.search('R.alisat... : (\w+ \w+)', info)
                 real = re.search('R.+alis.+ (\w+ \w+)', info)
                 year = re.search('Ann.+e : (\w+)', info)
-                cat = re.search('Cat.+gorie : (\w+)', info)
+                cat = re.search('Cat.+gorie : (.+)', info)
                 actors = re.search('Avec : (.+)', info)
                 if real:
                     print 'realisateur = %s' % (real.group(1))
