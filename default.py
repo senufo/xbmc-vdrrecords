@@ -146,6 +146,7 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     ''' Add a list item to the XBMC UI.'''
     isFolder = False
     #ListItem([label, label2, iconImage, thumbnailImage, path])
+    name = re.sub('_',' ',name)
     li = xbmcgui.ListItem(name, 'label2') #,
            # '/home/henri/.xbmc/userdata/Thumbnails/Video/0/0a1d1359.tbn',
            #'/home/henri/.xbmc/userdata/Thumbnails/Video/0/09f19a67.tbn')
@@ -158,6 +159,15 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     except:
         info_file = open('%s/info.vdr' % url_file, 'r')
     for line in info_file:
+        if re.search('^E',line):
+            heure = line[2:].split(' ')
+            time_start = time.gmtime(int(heure[1]))
+            heure_start = '%02d:%02d' % (time_start.tm_hour,time_start.tm_min)
+            aired = '%02d-%02d-%04d' % (time_start.tm_wday,
+                                   time_start.tm_mon,time_start.tm_year)
+            duration = '%04d' % int(heure[2])
+            duration = time.strftime('%H:%M', time.gmtime(int(heure[2])))
+        #Description du record
         if re.search('^D', line):
             print 'lines = %s' % line
             realisateur = ''
@@ -201,6 +211,8 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
                                           'director' : realisateur,
                                           'genre' : category,
                                           'year' : int(annee),
+                                          'aired' : aired,
+                                          'duration' : duration,
                                           'cast' : acteurs})
     print 'Plot = %s' % summary
     li.setProperty('IsPlayable', 'true')
