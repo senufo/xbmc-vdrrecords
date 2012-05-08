@@ -16,7 +16,6 @@ import os
 import os.path
 import glob
 import re
-#import string
 import time
 
 #Variables globales
@@ -106,10 +105,10 @@ class Password(xbmcgui.WindowXML):
         """
         Actions when mouse click on control
         """
-        print ( "onClick controId = %d " % controlId)
         if controlId == 21:
-            print "PASSWORD = %s " % self.password
+            #print "PASSWORD = %s " % self.password
             self.close()
+
 # utility functions
 # parse parameters for the menu
 def parameters_string_to_dict(parameters):
@@ -121,20 +120,19 @@ def parameters_string_to_dict(parameters):
             paramSplits = paramsPair.split('=')
             if (len(paramSplits)) == 2:
                 paramDict[paramSplits[0]] = paramSplits[1]
-                print "paramDict[%s] = %s " % (paramSplits[0], paramSplits[1])
+                #print "paramDict[%s] = %s " % (paramSplits[0], paramSplits[1])
     return paramDict
 
-#Test getSTACK
 def getSTACK(urlstack):
     """
     make a stack for video files
     """
     #On regarde combien de fichier ts on a
     files = glob.glob('%s/*.ts' % urlstack)
-    print "FILES %s" % files
+    #print "FILES %s" % files
     if not files:
         files = glob.glob('%s/0*.vdr' % urlstack)
-    print "FILES %s" % files
+    #print "FILES %s" % files
     #On trie l'ordre des fichiers
     files.sort()
     stack = "stack://" + " , ".join( files )
@@ -145,26 +143,25 @@ def getSTACK(urlstack):
 def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     ''' Add a list item to the XBMC UI.'''
     isFolder = False
-    #ListItem([label, label2, iconImage, thumbnailImage, path])
+    #remplace les _ par des espaces
     name = re.sub('_',' ',name)
     li = xbmcgui.ListItem(name, 'label2') #,
-           # '/home/henri/.xbmc/userdata/Thumbnails/Video/0/0a1d1359.tbn',
-           #'/home/henri/.xbmc/userdata/Thumbnails/Video/0/09f19a67.tbn')
     #VideoPlayer.Tagline Small Summary of current playing Video, Critique
     #VideoPlayer.PlotOutline Small Summary of current playing Video, Intrigue
     #VideoPlayer.Plot Complete Text Summary of current playing Video, Résumé 
     summary = ""
+    #Prend en compte les video de VDR < 1.7.0
     try:
         info_file = open('%s/info' % url_file, 'r')
     except:
         info_file = open('%s/info.vdr' % url_file, 'r')
-    print "INFO FILE NAME = %s/info" % url_file
-    realisateur = 'x'
+    #Mets des valeurs par défaut pour les infos
+    realisateur = ' '
     annee = 0
     category = 'CATEGORY'
     acteurs = []
     for line in info_file:
-        print "INFO_FILE LINE = %s " % line
+        #print "INFO_FILE LINE = %s " % line
         if re.search('^E',line):
             heure = line[2:].split(' ')
             time_start = time.gmtime(int(heure[1]))
@@ -175,8 +172,8 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
             duration = time.strftime('%H:%M', time.gmtime(int(heure[2])))
         #Description du record
         if re.search('^D', line):
-            print 'D lines = %s' % line
-            realisateur = 'x'
+            #print 'D lines = %s' % line
+            realisateur = ''
             lines = line.split('|')
             flag1 = False
             #Recupere les acteurs
@@ -188,31 +185,24 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
                 if re.match('Acteurs',info) :
                     flag1 = True
             for info in lines:
-                #real = re.search('R.alisat... : (\w+ \w+)', info)
                 real = re.search('R.+alis.+ (\w+ \w+)', info,  re.IGNORECASE)
                 year = re.search('Ann.+e : (\w+)', info)
                 cat = re.search('Cat.+gorie : (.+)', info)
                 actors = re.search('Avec : (.+)', info)
                 if real:
-                    print 'realisateur = %s' % (real.group(1))
                     realisateur = real.group(1)
-                else:
-                    print 'REAL = %s ' % info
                 if year:
                     annee = year.group(1)
                 if cat:
                     category = cat.group(1)
                 if actors:
-                    print "GROUP = %s " % actors.groups()
+                    #print "GROUP = %s " % actors.groups()
                     acteurs = actors.group(1).split(',')
-                    print "Acteurs = %s, actors = %s " %  (acteurs,actors.group(1))
+                    #print "Acteurs = %s, actors = %s " %  (acteurs,actors.group(1))
             summary = re.sub("^D ", '', line)
             summary = re.sub('\|', '\n', summary)
             #sum_uni = unicode(summary, errors='replace')
     info_file.close()
-    print "====> %s - %s - %s - %d - %s - %s - %s" % (name, realisateur, category,
-                                                int(annee), aired, duration,
-                                                acteurs)
     li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary,
                                           'director' : realisateur,
                                           'genre' : category,
@@ -220,12 +210,12 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
                                           'aired' : aired,
                                           'duration' : duration,
                                           'cast' : acteurs})
-    print 'Plot = %s' % summary
+    #print 'Plot = %s' % summary
     li.setProperty('IsPlayable', 'true')
     if isProtect:
         url_2 = sys.argv[0] + '?url=' + url_file + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
         li.setProperty('IsPlayable', 'false')
-        print "URL = %s, url_file => %s " % (url_2, url_file) 
+        #print "URL = %s, url_file => %s " % (url_2, url_file) 
     else:
         url_2 = getSTACK( url_file )
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url_2,
@@ -306,7 +296,7 @@ def show_menu(path, racine='video'):
  
     xbmcplugin.endOfDirectory(handle=int(handle), succeeded=True)
 
-#Debut du prgramme
+#Debut du programme
 password = __addon__.getSetting('pin')
 password_ok = True
 # parameter values
@@ -315,22 +305,13 @@ params = parameters_string_to_dict(sys.argv[2])
 # Depending on the mode, call the appropriate function to build the UI.
 #On recupere les parametres de la listBox
 params = parameters_string_to_dict(sys.argv[2])
-print "#" * 30
-print "sys.argv[2] = %s " % sys.argv[2]
 handle = sys.argv[1]
-print "HANDLE = %s " % handle
-print "#" * 30
 
 if not sys.argv[2]:
     # new start
     path = __addon__.getSetting('dir')
-
-    #path = '/video/'
     ok = show_menu(path)
 elif int(params['mode']) == MODE_FILE:
-    #print "mode = %s " % params['mode']
-    #print "url = %s " % params['url']
-    #print "protect = %s " % params['protect']
     listitem = xbmcgui.ListItem(params['title'])
     #remplace _ par des espaces
     titre = params['title'].replace('_',' ')
@@ -342,19 +323,13 @@ elif int(params['mode']) == MODE_FILE:
         # de la télécommande
         dialog = xbmcgui.Dialog()
                 #'Entrez le code parental'
-        locstr = __addon__.getLocalizedString(id=40100) 
+        locstr = __addon__.getLocalizedString(id=40100)
+        #Clavier pour ne pas voir le password avec le télécommande
         if KEYBOARD:
             dia_pass = Password('DialogNum.xml', __cwd__ ,"Default")
-            #wid = xbmcgui.getCurrentWindowId()
-            #print 'WID + %d ' % wid
-            #xbmc.executebuiltin('ActivateWindow(%d)' % 999)
-            #wid = xbmcgui.getCurrentWindowId()
-            #print 'WID = %d ' % wid
             dia_pass.doModal()
-            print "dia_pass.password %s " % dia_pass.password
             pin = dia_pass.password
             del dia_pass
-            print "Sortie de domodal"
         else:
             #Clavier virtuel pour mot de passe
             kb = xbmc.Keyboard('', 'heading', True)
@@ -364,70 +339,40 @@ elif int(params['mode']) == MODE_FILE:
             kb.doModal()
             if (kb.isConfirmed()):
                 pin = kb.getText()
-    
+        #Password défini dans settings.xml 
         password = __addon__.getSetting('pin')
 
-        print "code = %s " % pin
         #Pas le bon MdP
         if password not in pin:
             locstr = __addon__.getLocalizedString(id=40101)
             locstr2 = __addon__.getLocalizedString(id=40102)
             #         (" Erreur", " Mauvais code ")
             dialog.ok(locstr, locstr2)
-            print "MODE = %s " % params['mode']
             params['mode'] = MODE_FOLDER
-            print 'sys.argv = %s ' % sys.argv
         else:
             #Le MdP est correct on joue la video
             #print "FILE = %s " % stack
-            #url = listitem.getPath(path)
             url = params['url']
-            print "params Url = %s " % url
-
+            #Si plusieurs fichiers ts on les empile (fct stack de xbmc)
             stack = getSTACK(url)
+            #On ren l'item Playable
             listitem.setProperty('IsPlayable', 'true')
-
             listitem.setPath(stack)
-            print "ResolvedUrl = %s " % url
-            print 'handle isetResol= %s ' % handle
-            print "266 ================"
-            handle = 1
-            print 'handle setResol modif= %s ' % handle
-            print "==> PlayMedia(%s)" % stack 
-            #xbmcplugin.setResolvedUrl(handle, True, listitem)
-            #xbmc.executebuiltin( "PlayMedia(%s)" % stack )
+            #On mets le bon titre
             listitem.setInfo('video', {'Title': titre})
-            # listitem = xbmcgui.ListItem("old title",
-            #                           iconImage="DefaultVideo.png",
-            #                           thumbnailImage=iconimage)
-            # listitem.setInfo('video', {'Title': "old title"})
-            # player = streamplayer(xbmc.PLAYER_CORE_AUTO)
-            # player.play(url, listitem)
             xbmc.Player().play( stack, listitem )
-            
-            print "268 ================"
-            #xbmc.executebuiltin( "PlayMedia(%s)" % stack) 
     else:
         #Pas de protection on joue direct
         #Ne sert pas à effacer
-        print "271 ================"
-        print "==> PlayMedia(%s)" % stack 
         #xbmc.executebuiltin( "PlayMedia(%s)" % stack )
-        print "273 ================"
         xbmc.log( "Mon Player" )
     print "FIN SCRIPT================"
 #On a selectionné un dossier
 elif int(params['mode']) == MODE_FOLDER:
-    #print "mode = %s " % params['mode']
-    #print "url = %s " % params['url']
-    #print "protect = %s " % params['protect']
     path = params['url']
     rep = path.split('/')
-    #print "PATH => %s " % path
     ok = show_menu(path, racine=rep[-1])
-    print "FIN SCRIPT elif================"
-else:
-    print "FIN du IF => ELSE"
+
 ###############################################################################
 # BEGIN !
 ################################################################################
