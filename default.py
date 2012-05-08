@@ -5,11 +5,12 @@ view vdr records with parental control
 __addonID__      = "plugin.video.vdrrecords"
 __author__       = "Senufo"
 __date__         = "06-03-2012"
-__version__      = "0.1.0"
+__version__      = "0.1.8"
 
 import xbmcplugin
 import xbmcgui
 import xbmcaddon
+import password
 
 import sys
 import os
@@ -42,72 +43,6 @@ DEBUG = __addon__.getSetting( "debug" ) == "true"
 KEYBOARD = __addon__.getSetting( "keyboard" ) == "true"
 
 
-class Password(xbmcgui.WindowXML):
-    """
-    Clavier pour password
-    """
-    def onInit( self ):
-        """
-        Init Class EPGWIndow
-        """
-        self.password = ''
-    
-    def onAction(self, action):
-        """
-        get key for password
-        """
-        #print "ID Action %d" % action.getId()
-        #print "Code Action %d" % action.getButtonCode()
-        if action.getId() == 58:
-            self.password = self.password + '0'
-            taille = len(self.password)
-            self.getControl(4).setLabel('*' * taille)
-        if action.getId() == 59:
-            self.password = self.password + '1'
-            taille = len(self.password)
-            self.getControl(4).setLabel('*' * taille)
-        if action.getId() == 60 or action.getId() == 142:
-            self.password = self.password + '2'
-            taille = len(self.password)
-            self.getControl(4).setLabel('*' * taille)
-        if action.getId() == 61 or action.getId() == 143:
-            self.password = self.password + '3'
-            taille = len(self.password)
-            self.getControl(4).setLabel('*' * taille)
-        if action.getId() == 62 or action.getId() == 144:
-            self.password = self.password + '4'
-            taille = len(self.password)
-            self.getControl(4).setLabel('*' * taille)
-        if action.getId() == 63 or action.getId() == 145:
-            self.password = self.password + '5'
-            taille = len(self.password)
-            self.getControl(4).setLabel('*' * taille)
-        if action.getId() == 64 or action.getId() == 146:
-            self.password = self.password + '6'
-            taille = len(self.password)
-            self.getControl(4).setLabel('*' * taille)
-        if action.getId() == 65 or action.getId() == 147:
-            self.password = self.password + '7'
-            taille = len(self.password)
-            self.getControl(4).setLabel('*' * taille)
-        if action.getId() == 66 or action.getId() == 148:
-            self.password = self.password + '8'
-            taille = len(self.password)
-            self.getControl(4).setLabel('*' * taille)
-        if action.getId() == 67 or action.getId() == 149:
-            self.password = self.password + '9'
-            taille = len(self.password)
-            self.getControl(4).setLabel('*' * taille)
-
-
-
-    def onClick( self, controlId ):
-        """
-        Actions when mouse click on control
-        """
-        if controlId == 21:
-            #print "PASSWORD = %s " % self.password
-            self.close()
 
 # utility functions
 # parse parameters for the menu
