@@ -158,7 +158,13 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
         info_file = open('%s/info' % url_file, 'r')
     except:
         info_file = open('%s/info.vdr' % url_file, 'r')
+    print "INFO FILE NAME = %s/info" % url_file
+    realisateur = 'x'
+    annee = 0
+    category = 'CATEGORY'
+    acteurs = []
     for line in info_file:
+        print "INFO_FILE LINE = %s " % line
         if re.search('^E',line):
             heure = line[2:].split(' ')
             time_start = time.gmtime(int(heure[1]))
@@ -169,11 +175,8 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
             duration = time.strftime('%H:%M', time.gmtime(int(heure[2])))
         #Description du record
         if re.search('^D', line):
-            print 'lines = %s' % line
-            realisateur = ''
-            annee = 0
-            category = 'CATEGORY'
-            acteurs = []
+            print 'D lines = %s' % line
+            realisateur = 'x'
             lines = line.split('|')
             flag1 = False
             #Recupere les acteurs
@@ -186,7 +189,7 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
                     flag1 = True
             for info in lines:
                 #real = re.search('R.alisat... : (\w+ \w+)', info)
-                real = re.search('R.+alis.+ (\w+ \w+)', info)
+                real = re.search('R.+alis.+ (\w+ \w+)', info,  re.IGNORECASE)
                 year = re.search('Ann.+e : (\w+)', info)
                 cat = re.search('Cat.+gorie : (.+)', info)
                 actors = re.search('Avec : (.+)', info)
@@ -194,7 +197,7 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
                     print 'realisateur = %s' % (real.group(1))
                     realisateur = real.group(1)
                 else:
-                    print 'INFO = %s ' % info
+                    print 'REAL = %s ' % info
                 if year:
                     annee = year.group(1)
                 if cat:
@@ -207,6 +210,9 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
             summary = re.sub('\|', '\n', summary)
             #sum_uni = unicode(summary, errors='replace')
     info_file.close()
+    print "====> %s - %s - %s - %d - %s - %s - %s" % (name, realisateur, category,
+                                                int(annee), aired, duration,
+                                                acteurs)
     li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary,
                                           'director' : realisateur,
                                           'genre' : category,
