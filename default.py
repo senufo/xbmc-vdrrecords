@@ -21,7 +21,7 @@ import time
 
 #Variables globales
 
-temps = 0 
+temps = 0
 # plugin modes
 MODE_FILE = 1
 MODE_FOLDER = 10
@@ -29,11 +29,11 @@ MODE_FOLDER = 10
 # plugin handle
 handle = int(sys.argv[1])
 
-__addon__	= xbmcaddon.Addon(__addonID__)	
+__addon__	= xbmcaddon.Addon(__addonID__)
 __cwd__        = __addon__.getAddonInfo('path')
 __version__    = __addon__.getAddonInfo('version')
 __language__   = __addon__.getLocalizedString
- 
+
 __profile__    = xbmc.translatePath( __addon__.getAddonInfo('profile') )
 __resource__   = xbmc.translatePath( os.path.join( __cwd__, 'resources',
                                                           'lib' ) )
@@ -73,7 +73,7 @@ def getSTACK(urlstack):
     stack = "stack://" + " , ".join( files )
     #print "STACK = %s " % stack
     return stack
-    
+
 #Add a file in list
 def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     ''' Add a list item to the XBMC UI.'''
@@ -83,7 +83,7 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     li = xbmcgui.ListItem(name, 'label2') #,
     #VideoPlayer.Tagline Small Summary of current playing Video, Critique
     #VideoPlayer.PlotOutline Small Summary of current playing Video, Intrigue
-    #VideoPlayer.Plot Complete Text Summary of current playing Video, Résumé 
+    #VideoPlayer.Plot Complete Text Summary of current playing Video, Résumé
     summary = ""
     #Prend en compte les video de VDR < 1.7.0
     try:
@@ -150,7 +150,7 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     if isProtect:
         url_2 = sys.argv[0] + '?url=' + url_file + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
         li.setProperty('IsPlayable', 'false')
-        #print "URL = %s, url_file => %s " % (url_2, url_file) 
+        #print "URL = %s, url_file => %s " % (url_2, url_file)
     else:
         url_2 = getSTACK( url_file )
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url_2,
@@ -161,7 +161,8 @@ def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
     #isFolder=False
     li = xbmcgui.ListItem(name)
     li.setInfo( type="Video", infoLabels={ "Title": name })
-    url = sys.argv[0] + '?url=' + url + '&mode=' + str(mode) 
+    url = sys.argv[0] + '?url=' + url + '&mode=' + str(mode)
+    print "addDir : url = %s , Titre = %s, Folder = %s" % (url, name, isFolder)
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
 
@@ -169,12 +170,13 @@ def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
 # UI builder functions
 def show_menu(path, racine='video'):
     ''' Show the plugin menu. '''
+    print "Show MENU path = %s, racine = %s" % (path,racine)
     #list of vdr records
     listRecords = []
     #list of folders
     Folders = []
-    for root, dirs, files in os.walk(path): 
-        try: 
+    for root, dirs, files in os.walk(path):
+        try:
             #On recherche les répertoires de VDR de la forme
             # 2011-02-10.20.30.42-0.rec
             if re.search('\d{4}-\d{2}-\d{2}\.', dirs[0]):
@@ -184,7 +186,7 @@ def show_menu(path, racine='video'):
                 if racine in titres[-2]:
                     Folder = False
                     files = os.listdir('%s/%s' % (root, dirs[0]))
-                    tree = {'root': root, 'dirs': dirs, 'files': files, 
+                    tree = {'root': root, 'dirs': dirs, 'files': files,
                             'Folder': Folder}
                     listRecords.append(tree)
                 else:
@@ -196,7 +198,7 @@ def show_menu(path, racine='video'):
                     else:
                         Folder = titres[-2]
                         Folders.append(titres[-2])
-                        tree = {'root': root, 'dirs': dirs, 'files': files, 
+                        tree = {'root': root, 'dirs': dirs, 'files': files,
                                 'Folder': Folder}
                         listRecords.append(tree)
         except:
@@ -207,7 +209,7 @@ def show_menu(path, racine='video'):
         #C'est un répertoire
         if record['Folder']:
             titres = record['root'].split('/')
-            #print 'record FOLDER = %s' % record
+            print 'record FOLDER = %s' % record
             folder = '/'.join(titres[:-1])
             name = re.sub(r'%|@', '', titres[-2])
             addDir(name, folder, mode=10, isFolder=True)
@@ -228,7 +230,7 @@ def show_menu(path, racine='video'):
                 pass
             else:
                 addFile(name, chemin, 1, "icon.png", isProtect)
- 
+
     xbmcplugin.endOfDirectory(handle=int(handle), succeeded=True)
 
 #Debut du programme
@@ -274,7 +276,7 @@ elif int(params['mode']) == MODE_FILE:
             kb.doModal()
             if (kb.isConfirmed()):
                 pin = kb.getText()
-        #Password défini dans settings.xml 
+        #Password défini dans settings.xml
         password = __addon__.getSetting('pin')
 
         #Pas le bon MdP
@@ -305,7 +307,9 @@ elif int(params['mode']) == MODE_FILE:
 #On a selectionné un dossier
 elif int(params['mode']) == MODE_FOLDER:
     path = params['url']
+    path = re.sub('%2f','/',path)
     rep = path.split('/')
+    print "Selection Dossier = %s, rep = %s" % (path,rep)
     ok = show_menu(path, racine=rep[-1])
 
 ###############################################################################
@@ -325,7 +329,7 @@ if ( __name__ == "__main__" ):
         mode = None
         print "sys.arg = %s " % sys.argv[ 1 ]
         if password_ok == True:
-            xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ), 
+            xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ),
                                      sortMethod=xbmcplugin.SORT_METHOD_LABEL )
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
         else:
