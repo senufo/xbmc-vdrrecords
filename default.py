@@ -162,7 +162,7 @@ def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
     li = xbmcgui.ListItem(name)
     li.setInfo( type="Video", infoLabels={ "Title": name })
     url = sys.argv[0] + '?url=' + url + '&mode=' + str(mode)
-    print "addDir : url = %s , Titre = %s, Folder = %s" % (url, name, isFolder)
+    #print "addDir : url = %s , Titre = %s, Folder = %s" % (url, name, isFolder)
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
 
@@ -170,7 +170,7 @@ def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
 # UI builder functions
 def show_menu(path, racine='video'):
     ''' Show the plugin menu. '''
-    print "Show MENU path = %s, racine = %s" % (path,racine)
+    #print "Show MENU path = %s, racine = %s" % (path,racine)
     #list of vdr records
     listRecords = []
     #list of folders
@@ -209,7 +209,7 @@ def show_menu(path, racine='video'):
         #C'est un répertoire
         if record['Folder']:
             titres = record['root'].split('/')
-            print 'record FOLDER = %s' % record
+            #print 'record FOLDER = %s' % record
             folder = '/'.join(titres[:-1])
             name = re.sub(r'%|@', '', titres[-2])
             addDir(name, folder, mode=10, isFolder=True)
@@ -309,7 +309,7 @@ elif int(params['mode']) == MODE_FOLDER:
     path = params['url']
     path = re.sub('%2f','/',path)
     rep = path.split('/')
-    print "Selection Dossier = %s, rep = %s" % (path,rep)
+    #print "Selection Dossier = %s, rep = %s" % (path,rep)
     ok = show_menu(path, racine=rep[-1])
 
 ###############################################################################
