@@ -103,8 +103,10 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
             heure_start = '%02d:%02d' % (time_start.tm_hour,time_start.tm_min)
             aired = '%02d-%02d-%04d' % (time_start.tm_wday,
                                    time_start.tm_mon,time_start.tm_year)
-            duration = '%04d' % int(heure[2])
-            duration = time.strftime('%H:%M', time.gmtime(int(heure[2])))
+            #Durée exprimée en secondes dans le fichier info de VDR
+            #pour XBMC il le faut en minutes
+            #Attention il peut y avoir des erreurs dans ce fichier (ePG)
+            duration = (int(heure[2])/60)
         #Description du record
         if re.search('^D', line):
             #print 'D lines = %s' % line
