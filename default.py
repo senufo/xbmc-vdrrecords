@@ -10,6 +10,7 @@ __version__      = "0.1.9"
 import xbmcplugin
 import xbmcgui
 import xbmcaddon
+import xbmcvfs
 import password
 
 import sys
@@ -29,7 +30,7 @@ MODE_FOLDER = 10
 # plugin handle
 handle = int(sys.argv[1])
 
-__addon__	= xbmcaddon.Addon(__addonID__)
+__addon__      = xbmcaddon.Addon(__addonID__)
 __cwd__        = __addon__.getAddonInfo('path')
 __version__    = __addon__.getAddonInfo('version')
 __language__   = __addon__.getLocalizedString
@@ -176,7 +177,7 @@ def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
 # UI builder functions
 def show_menu(path, racine='video'):
     ''' Show the plugin menu. '''
-    #xbmc.log(msg='Show MENU path = %s, racine = %s' % (path,racine),level=DEBUG)
+    xbmc.log(msg='Show MENU path = %s, racine = %s' % (path,racine),level=DEBUG)
     #list of vdr records
     listRecords = []
     #list of folders
@@ -314,9 +315,10 @@ elif int(params['mode']) == MODE_FILE:
 #On a selectionné un dossier
 elif int(params['mode']) == MODE_FOLDER:
     path = params['url']
-    path = re.sub('%2f','/',path)
+    #path = re.sub('%2f','/',path)
+    path = xbmc.translatePath(path)
     rep = path.split('/')
-    #xbmc.log(msg='Selection Dossier = %s, rep = %s' % (path,rep),level=DEBUG)
+    xbmc.log(msg='Selection Dossier = %s, rep = %s, params_url = %s' % (path,rep, params['url']),level=DEBUG)
 
     ok = show_menu(path, racine=rep[-1])
 
