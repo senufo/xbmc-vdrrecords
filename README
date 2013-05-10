@@ -1,1 +1,2 @@
 This plugin allows you to see the menu from video recordings of VDR in the light of parental control
+only works under Linux, due to the difference in path (/ and \)
