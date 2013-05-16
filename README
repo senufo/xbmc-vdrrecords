@@ -1,2 +1,13 @@
+#################
+Plugin VDR Record
+#################
+
 This plugin allows you to see the menu from video recordings of VDR in the light of parental control
 only works under Linux, due to the difference in path (/ and \)
+
+WARNING :
+---------
+i'm rewrite entire code for a better support. Please use the zip version
+* for frodo : v0.1.9
+* for eden  :  v0.1.8
+
