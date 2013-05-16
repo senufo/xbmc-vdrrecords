@@ -47,6 +47,7 @@ if (DEBUG == "true"):
     DEBUG = LOGDEBUG
 else:
     DEBUG = -1 #LOGNONE
+DEPTH = 0
 
 # utility functions
 # parse parameters for the menu
@@ -66,9 +67,12 @@ def getSTACK(urlstack):
     """
     make a stack for video files
     """
+    #fichiers = xbmcvfs.listdir(urlstack)
+    print "XBMCVFS : %s" % urlstack
+    #print fichiers
     #On regarde combien de fichier ts on a
     files = glob.glob('%s/*.ts' % urlstack)
-    xbmc.log(msg='FILES %s' % files,level=DEBUG)
+    #xbmc.log(msg='FILES %s' % files,level=DEBUG)
     if not files:
         files = glob.glob('%s/0*.vdr' % urlstack)
     #xbmc.log(msg='FILES %s' % files,level=DEBUG)
@@ -76,12 +80,13 @@ def getSTACK(urlstack):
     files.sort()
     files.reverse()
     stack = "stack://" + " , ".join( files )
-    xbmc.log(msg='STACK = %s ' % stack,level=DEBUG)
+    #xbmc.log(msg='STACK = %s ' % stack,level=DEBUG)
     return stack
 
 #Add a file in list
 def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     ''' Add a list item to the XBMC UI.'''
+    print "ADDFILE url_file = %s " % url_file
     isFolder = False
     #remplace les _ par des espaces
     name = re.sub('_',' ',name)
@@ -173,6 +178,69 @@ def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
 
+def explore_tree(titre, dir_ss):
+    """
+    Explore le répertoire de VDR
+    Renvoi le titre de l'enregistrement si il trouve
+    un répertoire de la forme : 2011-02-10.20.30.42-0.rec
+    """
+
+    #On recherche les répertoires de VDR de la forme
+    # 2011-02-10.20.30.42-0.rec
+    if re.search('\d{4}-\d{2}-\d{2}\.', dir_ss):
+        #On décompose le chemin complet
+        titres = titre
+        print 'TITRE = %s' % titres
+
+def walk(path, recursive):
+    filenames = []
+    dirnames   = []
+    dirs      = []
+    files     = []
+    #print "WALK Path = %s" % path
+    if xbmcvfs.exists(xbmc.translatePath(path)):
+        subdirs, files = xbmcvfs.listdir(path)
+        #print "SUBDIRS :"
+        #print subdirs
+        #print "FILES : "
+        #print files
+        #print "+++++++++++++++++++++++++++"
+        for dir in subdirs:
+            #print "BOUCLE SUBDIRS"
+            dirnames.append(os.path.join(path, dir))
+            #print os.path.join(path, dir)
+            dirnames.append(os.path.join(path, dir))
+            #print "FIN BOUCLE SUBDIRS"
+
+        for file in files:
+            #print "BOUCLE FILES"
+            #if types is not None:
+            #    if os.path.splitext(file)[1].upper() in types or os.path.splitext(file)[1].lower() in types :
+            #        filenames.append(os.path.join(path, file))
+            #else:
+            filenames.append(os.path.join(path, file))
+            #print "FIN BOUCLE FILES"
+        if recursive:
+            for item in subdirs:
+                dirnames1, filenames1 = walk(os.path.join(path, item), recursive)
+                #print "______"
+                #print "os.path.join(%s,%s)" % (path,item)
+                #print os.path.join(path,item)
+                #print "DIRNAMES1"
+                #print dirnames1
+                #print "FILENAMES1"
+                #print filenames1
+                #print "======"
+                for item in dirnames1:
+                    dirnames.append(item)
+                for item in filenames1:
+                    filenames.append(item)
+                if dirnames1:
+                    recursive = True
+                else:
+                    recursive = False
+
+    return dirnames, filenames
 
 # UI builder functions
 def show_menu(path, racine='video'):
@@ -182,20 +250,93 @@ def show_menu(path, racine='video'):
     listRecords = []
     #list of folders
     Folders = []
-    for root, dirs, files in os.walk(path):
+    #Parcours du répertoire des enregistrements de VDR
+    dirs, files = xbmcvfs.listdir(path)
+    print "LISTE DIR %s" % path
+    print dirs
+    print "===================="
+    print files
+    print "===================="
+    print type(path).__name__
+    print "''''''''''''''''''"
+    print "WALK"
+    dirwalk, filename1 = walk('/video',True)
+    print "''''''DIRWALK''''''''"
+    print dirwalk
+    print "''''''FILENAMES1''''''''"
+    print filename1
+    print "&&&&&&&&&&&&&&&&&&&&&&&&&"
+    #for lines in files:
+    #    print "=> %s" % lines
+    for dir_vdr in dirwalk:
+        #print "dir_vdr = %s " % dir_vdr
+        #print "&&&&&&&&&&&&&&&&&&&&&&&&&"
         try:
             #On recherche les répertoires de VDR de la forme
             # 2011-02-10.20.30.42-0.rec
-            if re.search('\d{4}-\d{2}-\d{2}\.', dirs[0]):
+            if re.search('\d{4}-\d{2}-\d{2}\.', dir_vdr):
+                print "DIR_VDR = %s" % dir_vdr
+                #on elimine 2011-02-10....
+                dir_temp = re.sub('/\d{4}-\d{2}-\d{2}\..*','',dir_vdr)
+                print "dir_temp = %s" % dir_temp
+                head, tail = os.path.split(dir_temp)
+                print "head = %s, tail = %s" % (head,tail)
+                nom_dir = os.path.dirname(head)
+                print "dirname =%s" % nom_dir
+                base_name = os.path.basename(head)
+                print "base_name = %s" % base_name
                 #On décompose le chemin complet
+                #titres = root.split('/')
+                #Si racine correspond à base_name  c'est la fin du chemin
+                print "racine = %s" % racine
+                if racine in base_name :
+                    Folder = False
+                    files = os.listdir('%s' % (dir_vdr))
+                    head, dirs = os.path.split(dir_vdr)
+                    tree = {'root': dir_vdr, 'dirs': dirs, 'files': files,
+                            'Folder': Folder}
+                    print "tree = "
+                    print tree
+                    listRecords.append(tree)
+                else:
+                    #Sinon c'est un répertoire
+                    #isFolder = True
+                    #On teste si c'est la 1ere fois que l'on voit ce répertoire
+                    if base_name in Folders:
+                        Folder = base_name
+                    else:
+                        Folder = base_name
+                        Folders.append(base_name)
+                        #files = os.listdir('%s' % (dir_vdr))
+                        files = []
+                        head, dirs = os.path.split(dir_vdr)
+                        tree = {'root': dir_vdr, 'dirs': dirs, 'files': files,
+                                'Folder': Folder}
+                        print "TREE = "
+                        print tree
+                        listRecords.append(tree)
+        except:
+            #Erreur ce n'est pas un répertoire VDR
+            pass
+
+    #for root, dirs, files in os.walk(path):
+    for root, dirs, files in os.walk('/video'):
+        try:
+   #         #On recherche les répertoires de VDR de la forme
+   #         # 2011-02-10.20.30.42-0.rec
+            if re.search('\d{4}-\d{2}-\d{2}\.', dirs[0]):
+   #             #On décompose le chemin complet
                 titres = root.split('/')
-                #Si racine correspond à -2 c'est la fin du chemin
+   #             #Si racine correspond à -2 c'est la fin du chemin
                 if racine in titres[-2]:
                     Folder = False
                     files = os.listdir('%s/%s' % (root, dirs[0]))
+                    print "root = %s, dirs = %s, files =%s" % (root,dirs,files)
                     tree = {'root': root, 'dirs': dirs, 'files': files,
                             'Folder': Folder}
-                    listRecords.append(tree)
+                    print "TREE os.walk:"
+                    print tree
+                    #listRecords.append(tree)
                 else:
                     #Sinon c'est un répertoire
                     isFolder = True
@@ -207,7 +348,9 @@ def show_menu(path, racine='video'):
                         Folders.append(titres[-2])
                         tree = {'root': root, 'dirs': dirs, 'files': files,
                                 'Folder': Folder}
-                        listRecords.append(tree)
+                        print "TREE os.walk(rep =true):"
+                        print tree
+                        #listRecords.append(tree)
         except:
             #Erreur ce n'est pas un répertoire VDR
             pass
@@ -216,15 +359,25 @@ def show_menu(path, racine='video'):
         #C'est un répertoire
         if record['Folder']:
             titres = record['root'].split('/')
-            #print 'record FOLDER = %s' % record
+            print 'record FOLDER = %s' % record
+            print "TITRES"
+            print titres
+            print "titres -1 : %s, -2: %s" % (titres[-1], titres[-2])
             folder = '/'.join(titres[:-1])
             name = re.sub(r'%|@', '', titres[-2])
             addDir(name, folder, mode=10, isFolder=True)
         #C'est un fichier
         else:
             chemin = '%s/%s' % (record['root'], record['dirs'][0])
+            chemin = '%s' % (record['root'])
+            print "chemin = %s" %chemin
+            print "RECORD"
+            print record
             titres = record['root'].split('/')
-            name = re.sub(r'%|@', '', titres[-1])
+            print "FILE TITRES"
+            print titres
+            print "titres -2 : %s" %titres[-2]
+            name = re.sub(r'%|@', '', titres[-2])
             #Ce répertoire a le controle parental actif
             if 'protection.fsk' in '/'.join(record['files']):
                 isProtect = True
