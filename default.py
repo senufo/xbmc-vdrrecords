@@ -67,9 +67,6 @@ def getSTACK(urlstack):
     """
     make a stack for video files
     """
-    #fichiers = xbmcvfs.listdir(urlstack)
-    print "XBMCVFS : %s" % urlstack
-    #print fichiers
     #On regarde combien de fichier ts on a
     files = glob.glob('%s/*.ts' % urlstack)
     #xbmc.log(msg='FILES %s' % files,level=DEBUG)
@@ -86,7 +83,6 @@ def getSTACK(urlstack):
 #Add a file in list
 def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     ''' Add a list item to the XBMC UI.'''
-    print "ADDFILE url_file = %s " % url_file
     isFolder = False
     #remplace les _ par des espaces
     name = re.sub('_',' ',name)
@@ -178,66 +174,6 @@ def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
 
-def explore_tree(titre, dir_ss):
-    """
-    Explore le répertoire de VDR
-    Renvoi le titre de l'enregistrement si il trouve
-    un répertoire de la forme : 2011-02-10.20.30.42-0.rec
-    """
-
-    #On recherche les répertoires de VDR de la forme
-    # 2011-02-10.20.30.42-0.rec
-    if re.search('\d{4}-\d{2}-\d{2}\.', dir_ss):
-        #On décompose le chemin complet
-        titres = titre
-        print 'TITRE = %s' % titres
-
-def walk(path, recursive):
-    filenames = []
-    dirnames   = []
-    dirs      = []
-    files     = []
-    #print "WALK Path = %s" % path
-    if xbmcvfs.exists(xbmc.translatePath(path)):
-        subdirs, files = xbmcvfs.listdir(path)
-        print "SUBDIRS :"
-        print subdirs
-        #print "FILES : "
-        #print files
-        #print "+++++++++++++++++++++++++++"
-        for dir in subdirs:
-            print "dir in SUBDIRS : %s" % dir
-            dirnames.append(os.path.join(path, dir))
-            #print os.path.join(path, dir)
-            dirnames.append(os.path.join(path, dir))
-            #print "FIN BOUCLE SUBDIRS"
-
-        #for file in files:
-            #print "BOUCLE FILES"
-            #if types is not None:
-            #    if os.path.splitext(file)[1].upper() in types or os.path.splitext(file)[1].lower() in types :
-            #        filenames.append(os.path.join(path, file))
-            #else:
-        #    filenames.append(os.path.join(path, file))
-            #print "FIN BOUCLE FILES"
-        if recursive:
-            print "Entre dans recursive"
-            for item in subdirs:
-                dirnames1, filenames1 = walk(os.path.join(path, item), recursive)
-                print "====== retour de walk"
-                for item in dirnames1:
-                    print "*dir %s**********************" % dir
-                    print "DIRNAMES1 SUBDIRS : %s" % item
-                    dirnames.append(item)
-                    print "============================="
-                for item in filenames1:
-                    filenames.append(item)
-                if dirnames1:
-                    recursive = True
-                else:
-                    recursive = False
-
-    return dirnames, filenames
 
 # UI builder functions
 def show_menu(path, racine='video'):
@@ -272,7 +208,6 @@ def show_menu(path, racine='video'):
                 scan_dir = os.path.join(path,dir_vdr,dir_rec[0])
                 print "Scan_dir %s" % scan_dir
                 files = os.listdir('%s' % (scan_dir))
-#                    head, dirs = os.path.split(dir_vdr)
                 tree = {'root': scan_dir, 'dirs': dir_vdr, 'files': files,
                             'Folder': Folder}
                 print "tree FILE = ", tree
@@ -283,7 +218,6 @@ def show_menu(path, racine='video'):
                  #On teste si c'est la 1ere fois que l'on voit ce répertoire
                 print "Nom Dossier (dir_vdr) : %s" % dir_vdr
                 files = []
-#                        head, dirs = os.path.split(dir_vdr)
                 scan_dir = "%s%s/%s" %(path,dir_vdr,dir_rec[0])
                 print "Scan_dir %s" % scan_dir
                 tree = {'root': scan_dir, 'dirs': scan_dir, 'files': files,
@@ -295,11 +229,8 @@ def show_menu(path, racine='video'):
             print "Unexpected error:", sys.exc_info()[0]
             pass
 
-    print "RECORD", listRecords
-    print "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
     #On affiche la liste
     for record in listRecords:
-        print "record de listRecords", record
         #C'est un répertoire
         if record['Folder']:
             titres = record['root'].split('/')
