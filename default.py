@@ -60,7 +60,7 @@ def parameters_string_to_dict(parameters):
             paramSplits = paramsPair.split('=')
             if (len(paramSplits)) == 2:
                 paramDict[paramSplits[0]] = paramSplits[1]
-                #xbmc.log(msg='paramDict[%s] = %s " % (paramSplits[0], paramSplits[1]),level=DEBUG)
+                xbmc.log(msg='paramDict[%s] = %s ' % (paramSplits[0], paramSplits[1]),level=DEBUG)
     return paramDict
 
 def getSTACK(urlstack):
@@ -242,8 +242,9 @@ def walk(path, recursive):
 # UI builder functions
 def show_menu(path, racine='video'):
     ''' Show the plugin menu. '''
-    path = xbmc.translatePath(path)
-    xbmc.log(msg='Show MENU path xx = %s, racine = %s' % (path,racine),level=DEBUG)
+    tpath = xbmc.translatePath(path)
+    vpath = xbmc.validatePath(path)
+    xbmc.log(msg='Show MENU tpath = %s, fpath = %s, racine = %s' % (tpath,vpath, racine),level=DEBUG)
     #list of vdr records
     listRecords = []
     #list of folders
@@ -256,7 +257,9 @@ def show_menu(path, racine='video'):
         try:
             #On recherche les répertoires de VDR de la forme
             # 2011-02-10.20.30.42-0.rec
-            dir_rec, files_rec = xbmcvfs.listdir(path+dir_vdr)
+            scan_dir = os.path.join(path,dir_vdr)
+            print "Scan dir 2 : %s" % scan_dir
+            dir_rec, files_rec = xbmcvfs.listdir(scan_dir)
             print "dir_rec %s, dir_vdr : %s, path : %s" % (dir_rec[0],dir_vdr, path)
             if re.search('\d{4}-\d{2}-\d{2}.*rec', dir_rec[0]):
                 print "DIR_VDR (nom film) = %s" % dir_vdr
@@ -265,6 +268,8 @@ def show_menu(path, racine='video'):
 #                if (head + '/') == racine :
                 Folder = False
                 scan_dir = "%s%s/%s" %(path,dir_vdr,dir_rec[0])
+                print "Scan_dir1 %s" % scan_dir
+                scan_dir = os.path.join(path,dir_vdr,dir_rec[0])
                 print "Scan_dir %s" % scan_dir
                 files = os.listdir('%s' % (scan_dir))
 #                    head, dirs = os.path.split(dir_vdr)
@@ -304,6 +309,7 @@ def show_menu(path, racine='video'):
             print "titres -1 : %s, -2: %s" % (titres[-1], titres[-2])
             folder = '/'.join(titres[:-1])
             name = re.sub(r'%|@', '', titres[-2])
+            print "Record folder : %s, name : %s" % (folder,name)
             addDir(name, folder, mode=10, isFolder=True)
         #C'est un fichier
         else:
@@ -407,9 +413,10 @@ elif int(params['mode']) == MODE_FILE:
 #On a selectionné un dossier
 elif int(params['mode']) == MODE_FOLDER:
     path = params['url']
-    #path = re.sub('%2f','/',path)
+    path = re.sub('%2f','/',path)
     path = xbmc.translatePath(path)
     rep = path.split('/')
+    print "PARAMS :", params
     xbmc.log(msg='Selection Dossier = %s, rep = %s, params_url = %s' % (path,rep, params['url']),level=DEBUG)
 
     ok = show_menu(path, racine=rep[-1])
