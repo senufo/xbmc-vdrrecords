@@ -42,15 +42,12 @@ __resource__   = xbmc.translatePath( os.path.join( __cwd__, 'resources',
 xbmc_version = xbmc.__version__
 sys.path.append (__resource__)
 
-DEBUG = __addon__.getSetting( "debug" ) == "true"
+DEBUG_LEVEL = __addon__.getSetting( "debug" ) == "true"
 KEYBOARD = __addon__.getSetting( "keyboard" ) == "true"
-
-if (DEBUG == "true"):
-    DEBUG = LOGDEBUG
+if DEBUG_LEVEL:
+    DEBUG_LEVEL = xbmc.LOGDEBUG
 else:
-    DEBUG = -1 #LOGNONE
-DEBUG = 1
-DEPTH = 0
+    DEBUG_LEVEL = xbmc.LOGNONE
 
 # utility functions
 # parse parameters for the menu
@@ -63,7 +60,7 @@ def parameters_string_to_dict(parameters):
             paramSplits = paramsPair.split('=')
             if (len(paramSplits)) == 2:
                 paramDict[paramSplits[0]] = paramSplits[1]
-                xbmc.log(msg='paramDict[%s] = %s ' % (paramSplits[0], paramSplits[1]),level=DEBUG)
+                xbmc.log(msg='paramDict[%s] = %s ' % (paramSplits[0], paramSplits[1]),level=DEBUG_LEVEL)
     return paramDict
 
 def getSTACK(urlstack):
@@ -72,15 +69,15 @@ def getSTACK(urlstack):
     """
     #On regarde combien de fichier ts on a
     files = glob.glob('%s/*.ts' % urlstack)
-    #xbmc.log(msg='FILES %s' % files,level=DEBUG)
+    #xbmc.log(msg='FILES %s' % files,level=DEBUG_LEVEL)
     if not files:
         files = glob.glob('%s/0*.vdr' % urlstack)
-    #xbmc.log(msg='FILES %s' % files,level=DEBUG)
+    #xbmc.log(msg='FILES %s' % files,level=DEBUG_LEVEL)
     #On trie l'ordre des fichiers
     files.sort()
     #files.reverse()
     stack = "stack://" + " , ".join( files )
-    xbmc.log(msg='STACK = %s ' % stack,level=DEBUG)
+    xbmc.log(msg='STACK = %s ' % stack,level=DEBUG_LEVEL)
     return stack
 
 #Add a file in list
@@ -122,7 +119,7 @@ def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
     category = 'CATEGORY'
     acteurs = []
     for line in info_tab:
-        xbmc.log(msg='INFO_FILE LINE = %s ' % line,level=DEBUG)
+        xbmc.log(msg='INFO_FILE LINE = %s ' % line,level=DEBUG_LEVEL)
         if re.search('^E',line):
             heure = line[2:].split(' ')
             time_start = time.gmtime(int(heure[1]))
@@ -159,9 +156,9 @@ def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
                 if cat:
                     category = cat.group(1)
                 if actors:
-                    #xbmc.log(msg='GROUP = %s ' % actors.groups(),level=DEBUG)
+                    #xbmc.log(msg='GROUP = %s ' % actors.groups(),level=DEBUG_LEVEL)
                     acteurs = actors.group(1).split(',')
-                    #xbmc.log(msg='Acteurs = %s, actors = %s ' %  (acteurs,actors.group(1)),level=DEBUG)
+                    #xbmc.log(msg='Acteurs = %s, actors = %s ' %  (acteurs,actors.group(1)),level=DEBUG_LEVEL)
             summary = re.sub("^D ", '', line)
             summary = re.sub('\|', '\n', summary)
             #sum_uni = unicode(summary, errors='replace')
@@ -178,7 +175,7 @@ def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
     if isProtect:
         url_2 = sys.argv[0] + '?url=' + url_path + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
         li.setProperty('IsPlayable', 'false')
-        #xbmc.log(msg='URL = %s, url_path => %s ' % (url_2, url_path),level=DEBUG)
+        #xbmc.log(msg='URL = %s, url_path => %s ' % (url_2, url_path),level=DEBUG_LEVEL)
     else:
         url_2 = getSTACK( url_path )
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url_2,
@@ -192,7 +189,7 @@ def addDir(name, url='None', mode=1, iconimage='icon.png', isFolder=False):
     li.setInfo( type="Video", infoLabels={ "Title": name })
     #recupere l'adresse du fichier
     url = sys.argv[0] + '?url=' + url + '&mode=' + str(mode)
-    xbmc.log(msg='addDir : url = %s , Titre = %s, Folder = %s' % (url, name, isFolder),level=DEBUG)
+    xbmc.log(msg='addDir : url = %s , Titre = %s, Folder = %s' % (url, name, isFolder),level=DEBUG_LEVEL)
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
 
@@ -321,7 +318,7 @@ if not sys.argv[2]:
             protection = True
         else:
             #Le MdP est correct on joue la video
-            #xbmc.log(msg='FILE = %s ' % stack,level=DEBUG)
+            #xbmc.log(msg='FILE = %s ' % stack,level=DEBUG_LEVEL)
             locstr  = __addon__.getLocalizedString(id=40103) #Code
             locstr2 = __addon__.getLocalizedString(id=40104) #Code OK
             xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" % (locstr,locstr2))
@@ -338,28 +335,26 @@ elif int(params['mode']) == MODE_FOLDER:
     path = xbmc.translatePath(path)
     rep = path.split('/')
     print "PARAMS :", params
-    xbmc.log(msg='Selection Dossier = %s, rep = %s, params_url = %s' % (path,rep, params['url']),level=DEBUG)
+    xbmc.log(msg='Selection Dossier = %s, rep = %s, params_url = %s' % (path,rep, params['url']),level=DEBUG_LEVEL)
 
     ok = show_menu(path)
 
 ###############################################################################
 # BEGIN !
 ################################################################################
-print '  XBMC - Version: %s' % xbmc_version
 
 if ( __name__ == "__main__" ):
     try:
-        xbmc.log(msg='===============================',level=LOGNOTICE)
-        xbmc.log(msg='  VDR Records - Version: %s' % __version__,level=LOGNOTICE)
-        xbmc.log(msg='  XBMC - Version: %s' % xbmc_version,level=DEBUG)
-        print '  XBMC - Version: %s' % xbmc_version
-        xbmc.log(msg='===============================',level=LOGNOTICE)
+        xbmc.log(msg='===============================',level=DEBUG_LEVEL)
+        xbmc.log(msg='  VDR Records - Version: %s' % __version__,level=DEBUG_LEVEL)
+        xbmc.log(msg='  XBMC - Version: %s' % xbmc_version,level=DEBUG_LEVEL)
+        xbmc.log(msg='===============================',level=DEBUG_LEVEL)
 
         #params=get_params()
         url = None
         name = None
         mode = None
-        xbmc.log(msg='sys.arg = %s ' % sys.argv[ 1 ],level=DEBUG)
+        xbmc.log(msg='sys.arg = %s ' % sys.argv[ 1 ],level=DEBUG_LEVEL)
 
         if password_ok == True:
             xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ),
@@ -368,8 +363,8 @@ if ( __name__ == "__main__" ):
                                      sortMethod=xbmcplugin.SORT_METHOD_NONE )
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
         else:
-            xbmc.log(msg='password_ok = %s ' % password_ok,level=DEBUG)
+            xbmc.log(msg='password_ok = %s ' % password_ok,level=DEBUG_LEVEL)
 
     except:
-        xbmc.log(msg='Erreur',level=DEBUG)
+        xbmc.log(msg='Erreur',level=DEBUG_LEVEL)
 
