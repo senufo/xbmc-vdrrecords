@@ -176,11 +176,12 @@ def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
 
 
 # UI builder functions
-def show_menu(path, racine='video'):
+#Vérifier utilité du parametre racine
+def show_menu(path):
     ''' Show the plugin menu. '''
     tpath = xbmc.translatePath(path)
     vpath = xbmc.validatePath(path)
-    xbmc.log(msg='Show MENU tpath = %s, fpath = %s, racine = %s' % (tpath,vpath, racine),level=DEBUG)
+    xbmc.log(msg='Show MENU tpath = %s, fpath = %s' % (tpath,vpath),level=DEBUG)
     #list of vdr records
     listRecords = []
     #list of folders
@@ -199,9 +200,6 @@ def show_menu(path, racine='video'):
             print "dir_rec %s, dir_vdr : %s, path : %s" % (dir_rec[0],dir_vdr, path)
             if re.search('\d{4}-\d{2}-\d{2}.*rec', dir_rec[0]):
                 print "DIR_VDR (nom film) = %s" % dir_vdr
-                #Si racine correspond à base_name c'est la fin du chemin
-#                print "dir_vdr = %s, dir_tmp = %s, racine = %s, nom_dir %s, base_name %s" % (dir_vdr,dir_temp, racine,nom_dir, base_name)
-#                if (head + '/') == racine :
                 Folder = False
                 scan_dir = "%s%s/%s" %(path,dir_vdr,dir_rec[0])
                 print "Scan_dir1 %s" % scan_dir
@@ -294,7 +292,7 @@ handle = sys.argv[1]
 if not sys.argv[2]:
     # new start
     path = __addon__.getSetting('dir')
-    ok = show_menu(path,path)
+    ok = show_menu(path)
 elif int(params['mode']) == MODE_FILE:
     listitem = xbmcgui.ListItem(params['title'])
     #remplace _ par des espaces
@@ -361,7 +359,7 @@ elif int(params['mode']) == MODE_FOLDER:
     print "PARAMS :", params
     xbmc.log(msg='Selection Dossier = %s, rep = %s, params_url = %s' % (path,rep, params['url']),level=DEBUG)
 
-    ok = show_menu(path, racine=rep[-1])
+    ok = show_menu(path)
 
 ###############################################################################
 # BEGIN !
