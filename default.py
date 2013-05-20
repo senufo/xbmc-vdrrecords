@@ -38,7 +38,8 @@ __language__   = __addon__.getLocalizedString
 
 __profile__    = xbmc.translatePath( __addon__.getAddonInfo('profile') )
 __resource__   = xbmc.translatePath( os.path.join( __cwd__, 'resources',
-                                                          'lib' ) )
+                                                  'lib' ) )
+xbmc_version = xbmc.__version__
 sys.path.append (__resource__)
 
 DEBUG = __addon__.getSetting( "debug" ) == "true"
@@ -48,6 +49,7 @@ if (DEBUG == "true"):
     DEBUG = LOGDEBUG
 else:
     DEBUG = -1 #LOGNONE
+DEBUG = 1
 DEPTH = 0
 
 # utility functions
@@ -94,13 +96,26 @@ def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
     summary = ""
     #Prend en compte les video de VDR < 1.7.0
     #print "url_path = ", os.path.join(url_path,'info')
-    if xbmcvfs.exists(os.path.join(url_path,'info')):
-        info_file = xbmcvfs.File(os.path.join(url_path,'info'), 'r')
+    #Pour XBMC Frodo
+    if (xbmc_version == '2.0'):
+        if xbmcvfs.exists(os.path.join(url_path,'info')):
+            print "xbmc version => Version 2.O"
+            info_file = xbmcvfs.File(os.path.join(url_path,'info'), 'r')
+        else:
+            print "xbmc version => Version 2"
+            info_file = xbmcvfs.File(os.path.join(url_path,'info.vdr'), 'r')
+        #On lit le fichier et on le transforme en liste (\n)
+        info_tab = info_file.read()
+        info_tab = info_tab.split('\n')
     else:
-        info_file = xbmcvfs.File(os.path.join(url_path,'info.vdr'), 'r')
-    #On lit le fichier et on le transforme en liste (\n)
-    info_tab = info_file.read()
-    info_tab = info_tab.split('\n')
+    #Pour XBMC Eden
+        try:
+            print "xbmc version => Version 1.3"
+            info_file = open(os.path.join(url_path,'info'), 'r')
+        except:
+            print "xbmc version => Version 1.3"
+            info_file = open(os.path.join(url_path,'info.vdr'), 'r')
+        info_tab = info_file
     #Mets des valeurs par défaut pour les infos
     realisateur = ' '
     annee = 0
@@ -190,13 +205,25 @@ def show_menu(path):
     #list of folders
     Folders = []
     #Parcours du répertoire des enregistrements de VDR
-    dirs, files = xbmcvfs.listdir(path)
+    #Compatibilité FRODO
+    if (xbmc_version == '2.0'):
+        print "xbmc version => Version 2.0"
+        dirs, files = xbmcvfs.listdir(path)
+    #Compatibilité Eden
+    else:
+        print "xbmc version => Version 1.3"
+        dirs = os.listdir(path)
     for dir_vdr in dirs:
         try:
             #On recherche les répertoires de VDR de la forme
             # 2011-02-10.20.30.42-0.rec
             scan_dir = os.path.join(path,dir_vdr)
-            dir_rec, files_rec = xbmcvfs.listdir(scan_dir)
+            if (xbmc_version == '2.0'):
+                print "xbmc version => Version 2.0"
+                dir_rec, files_rec = xbmcvfs.listdir(scan_dir)
+            else:
+                print "xbmc version => Version 1.3"
+                dir_rec = os.listdir(scan_dir)
             if re.search('\d{4}-\d{2}-\d{2}.*rec', dir_rec[0]):
                 Folder = False
                 scan_dir = os.path.join(path,dir_vdr,dir_rec[0])
@@ -318,11 +345,14 @@ elif int(params['mode']) == MODE_FOLDER:
 ###############################################################################
 # BEGIN !
 ################################################################################
+print '  XBMC - Version: %s' % xbmc_version
 
 if ( __name__ == "__main__" ):
     try:
         xbmc.log(msg='===============================',level=LOGNOTICE)
         xbmc.log(msg='  VDR Records - Version: %s' % __version__,level=LOGNOTICE)
+        xbmc.log(msg='  XBMC - Version: %s' % xbmc_version,level=DEBUG)
+        print '  XBMC - Version: %s' % xbmc_version
         xbmc.log(msg='===============================',level=LOGNOTICE)
 
         #params=get_params()
