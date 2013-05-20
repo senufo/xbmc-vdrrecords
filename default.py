@@ -176,51 +176,33 @@ def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
 
 
 # UI builder functions
-#Vérifier utilité du parametre racine
 def show_menu(path):
     ''' Show the plugin menu. '''
-    tpath = xbmc.translatePath(path)
-    vpath = xbmc.validatePath(path)
-    xbmc.log(msg='Show MENU tpath = %s, fpath = %s' % (tpath,vpath),level=DEBUG)
     #list of vdr records
     listRecords = []
     #list of folders
     Folders = []
     #Parcours du répertoire des enregistrements de VDR
     dirs, files = xbmcvfs.listdir(path)
-    print "''''''''''''''''''"
-    print "WALK"
     for dir_vdr in dirs:
         try:
             #On recherche les répertoires de VDR de la forme
             # 2011-02-10.20.30.42-0.rec
             scan_dir = os.path.join(path,dir_vdr)
-            print "Scan dir 2 : %s" % scan_dir
             dir_rec, files_rec = xbmcvfs.listdir(scan_dir)
-            print "dir_rec %s, dir_vdr : %s, path : %s" % (dir_rec[0],dir_vdr, path)
             if re.search('\d{4}-\d{2}-\d{2}.*rec', dir_rec[0]):
-                print "DIR_VDR (nom film) = %s" % dir_vdr
                 Folder = False
-                scan_dir = "%s%s/%s" %(path,dir_vdr,dir_rec[0])
-                print "Scan_dir1 %s" % scan_dir
                 scan_dir = os.path.join(path,dir_vdr,dir_rec[0])
-                print "Scan_dir %s" % scan_dir
                 files = os.listdir('%s' % (scan_dir))
                 tree = {'root': scan_dir, 'dirs': dir_vdr, 'files': files,
                             'Folder': Folder}
-                print "tree FILE = ", tree
                 listRecords.append(tree)
             else:
-                    #Sinon c'est un répertoire
-                    #isFolder = True
-                 #On teste si c'est la 1ere fois que l'on voit ce répertoire
-                print "Nom Dossier (dir_vdr) : %s" % dir_vdr
+                #Sinon c'est un répertoire
                 files = []
-                scan_dir = "%s%s/%s" %(path,dir_vdr,dir_rec[0])
-                print "Scan_dir %s" % scan_dir
+                scan_dir = os.path.join(path,dir_vdr,dir_rec[0])
                 tree = {'root': scan_dir, 'dirs': scan_dir, 'files': files,
                                 'Folder': dir_vdr}
-                print "TREE DIR = ", tree
                 listRecords.append(tree)
         except:
             #Erreur ce n'est pas un répertoire VDR
@@ -231,40 +213,21 @@ def show_menu(path):
     for record in listRecords:
         #C'est un répertoire
         if record['Folder']:
-            #titres = record['root'].split('/')
-            #test_head, tail = os.path.split(record['root'])
-            print 'record FOLDER = %s' % record
-            print "TITRES"
-            #print titres
-            #print "titres -1 : %s, -2: %s" % (titres[-1], titres[-2])
-            #print "head = %s, tail = %s" % (test_head,tail)
-            #folder = '/'.join(titres[:-1])
             #ex: record['root'] => /home/henri/VDR_videos/NCIS/Alibi
             #folder => /home/henri/VDR_videos/NCIS/Alibi
             #name => NCIS
             folder = os.path.dirname(record['root'])
             name = os.path.basename(folder)
-            #print "basename = %s" % name
-            #name = re.sub(r'%|@', '', titres[-2])
-            name = re.sub(r'%|@', '', os.path.basename(folder))
-            #print "Record folder : %s, name : %s" % (folder,name)
             addDir(name, folder, mode=10, isFolder=True)
         #C'est un fichier
         else:
-            chemin = '%s/%s' % (record['root'], record['dirs'][0])
-            chemin = '%s' % (record['root'])
-            print "chemin = %s" %chemin
             chemin = xbmc.translatePath(record['root'])
-            #print 'che_os %s' % che_os
-            print "RECORD"
-            print record
-            titres = record['root'].split('/')
-            print "FILE TITRES"
-            print titres
-            print "titres -2 : %s" %titres[-2]
-            name = re.sub(r'%|@', '', titres[-2])
+            folder = os.path.dirname(record['root'])
+            titre = os.path.basename(folder)
+            name = re.sub(r'%|@', '', titre)
             #Ce répertoire a le controle parental actif
-            if 'protection.fsk' in '/'.join(record['files']):
+            if 'protection.fsk' in record['files']:
+                print "Protect = true"
                 isProtect = True
             else:
                 isProtect = False
@@ -337,7 +300,7 @@ elif int(params['mode']) == MODE_FILE:
             url = params['url']
             #Si plusieurs fichiers ts on les empile (fct stack de xbmc)
             stack = getSTACK(url)
-            #On ren l'item Playable
+            #On rend l'item Playable
             listitem.setProperty('IsPlayable', 'true')
             listitem.setPath(stack)
             #On mets le bon titre
