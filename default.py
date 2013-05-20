@@ -257,7 +257,6 @@ params = parameters_string_to_dict(sys.argv[2])
 #On recupere les parametres de la listBox
 params = parameters_string_to_dict(sys.argv[2])
 handle = sys.argv[1]
-print "PARAMS =>", params
 if not sys.argv[2]:
     # new start
     if protection:
@@ -291,13 +290,14 @@ if not sys.argv[2]:
             locstr2 = __addon__.getLocalizedString(id=40102)
             #         (" Erreur", " Mauvais code ")
             xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" % (locstr,locstr2))
-        #dialog.ok(locstr, locstr2)
             params['mode'] = MODE_FOLDER
             protection = True
         else:
             #Le MdP est correct on joue la video
             #xbmc.log(msg='FILE = %s ' % stack,level=DEBUG)
-            dialog.ok(locstr, 'Mot de passe OK')
+            locstr  = __addon__.getLocalizedString(id=40103) #Code
+            locstr2 = __addon__.getLocalizedString(id=40104) #Code OK
+            xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" % (locstr,locstr2))
             protection = False
     else:
         protection = False
