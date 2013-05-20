@@ -78,9 +78,9 @@ def getSTACK(urlstack):
     #xbmc.log(msg='FILES %s' % files,level=DEBUG)
     #On trie l'ordre des fichiers
     files.sort()
-    files.reverse()
+    #files.reverse()
     stack = "stack://" + " , ".join( files )
-    #xbmc.log(msg='STACK = %s ' % stack,level=DEBUG)
+    xbmc.log(msg='STACK = %s ' % stack,level=DEBUG)
     return stack
 
 #Add a file in list
