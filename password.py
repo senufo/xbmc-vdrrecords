@@ -13,14 +13,16 @@ class Password(xbmcgui.WindowXML):
         """
         Init Class EPGWIndow
         """
+        xbmcgui.WindowXML.__init__(self)
         self.password = ''
-    
+        print "Class PASSWORD"
+
     def onAction(self, action):
         """
         get key for password
         """
-        #print "ID Action %d" % action.getId()
-        #print "Code Action %d" % action.getButtonCode()
+        print "ID Action %d" % action.getId()
+        print "Code Action %d" % action.getButtonCode()
         if action.getId() == 58:
             self.password = self.password + '0'
             taille = len(self.password)
@@ -69,6 +71,6 @@ class Password(xbmcgui.WindowXML):
         Actions when mouse click on control
         """
         if controlId == 21:
-            #print "PASSWORD = %s " % self.password
+            print "PASSWORD = %s " % self.password
             self.close()
 

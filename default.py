@@ -11,7 +11,8 @@ import xbmcplugin
 import xbmcgui
 import xbmcaddon
 import xbmcvfs
-import password
+#import password
+from password import *
 
 import sys
 import os
@@ -231,24 +232,38 @@ def show_menu(path):
             folder = os.path.dirname(record['root'])
             titre = os.path.basename(folder)
             name = re.sub(r'%|@', '', titre)
-            #Ce répertoire a le controle parental actif
-            if 'protection.fsk' in record['files']:
-                print "Protect = true"
-                isProtect = True
+            #Si la protection est True on n'affiche pas les films
+            #avec protections.fsk
+            if protection:
+#                if 'protection.fsk' in record['files']:
+#                    print "Protect = true"
+#                    isProtect = True
+#                else:
+#                    isProtect = False
+#                    print "Protect = False"
+#                    addFile(name, chemin, 1, "icon.png", isProtect)
+                if 'protection.fsk' not in record['files']:
+                    isProtect = False
+                    print "Protect = False"
+                    addFile(name, chemin, 1, "icon.png", isProtect)
             else:
                 isProtect = False
-            CodeParental = True
-            if CodeParental:
                 addFile(name, chemin, 1, "icon.png", isProtect)
-            elif isProtect:
-                pass
-            else:
-                addFile(name, chemin, 1, "icon.png", isProtect)
+
+
+            #CodeParental = True
+            #if CodeParental:
+            #    addFile(name, chemin, 1, "icon.png", isProtect)
+            #elif isProtect:
+            #    pass
+            #else:
+            #    addFile(name, chemin, 1, "icon.png", isProtect)
 
     xbmcplugin.endOfDirectory(handle=int(handle), succeeded=True)
 
 #Debut du programme
 password = __addon__.getSetting('pin')
+protection = True
 password_ok = True
 # parameter values
 params = parameters_string_to_dict(sys.argv[2])
@@ -257,9 +272,47 @@ params = parameters_string_to_dict(sys.argv[2])
 #On recupere les parametres de la listBox
 params = parameters_string_to_dict(sys.argv[2])
 handle = sys.argv[1]
-
+print "PARAMS =>", params
 if not sys.argv[2]:
     # new start
+    if password:
+        #Classe Password pour pb visibilité de touche
+        # de la télécommande
+        dialog = xbmcgui.Dialog()
+                #'Entrez le code parental'
+        locstr = __addon__.getLocalizedString(id=40100)
+        #Clavier pour ne pas voir le password avec la télécommande
+        if KEYBOARD:
+            dia_pass = Password('DialogNum.xml', __cwd__ ,"Default")
+            dia_pass.show()
+            pin = dia_pass.password
+            del dia_pass
+        else:
+            #Clavier virtuel pour mot de passe
+            kb = xbmc.Keyboard('', 'heading', True)
+            kb.setDefault('') # optional
+            kb.setHeading(locstr) # optional
+            kb.setHiddenInput(True) # optional
+            kb.doModal()
+            if (kb.isConfirmed()):
+                pin = kb.getText()
+        #Password défini dans settings.xml
+        password = __addon__.getSetting('pin')
+
+        #Pas le bon MdP
+        if password not in pin:
+            locstr = __addon__.getLocalizedString(id=40101)
+            locstr2 = __addon__.getLocalizedString(id=40102)
+            #         (" Erreur", " Mauvais code ")
+            dialog.ok(locstr, locstr2)
+            params['mode'] = MODE_FOLDER
+            protection = True
+        else:
+            #Le MdP est correct on joue la video
+            #xbmc.log(msg='FILE = %s ' % stack,level=DEBUG)
+            dialog.ok(locstr, 'Mot de passe OK')
+            protection = False
+
     path = __addon__.getSetting('dir')
     ok = show_menu(path)
 elif int(params['mode']) == MODE_FILE:
@@ -275,10 +328,10 @@ elif int(params['mode']) == MODE_FILE:
         dialog = xbmcgui.Dialog()
                 #'Entrez le code parental'
         locstr = __addon__.getLocalizedString(id=40100)
-        #Clavier pour ne pas voir le password avec le télécommande
+        #Clavier pour ne pas voir le password avec la télécommande
         if KEYBOARD:
             dia_pass = Password('DialogNum.xml', __cwd__ ,"Default")
-            dia_pass.doModal()
+            dia_pass.show()
             pin = dia_pass.password
             del dia_pass
         else:
