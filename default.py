@@ -81,7 +81,7 @@ def getSTACK(urlstack):
     return stack
 
 #Add a file in list
-def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
+def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
     ''' Add a list item to the XBMC UI.'''
     isFolder = False
     #remplace les _ par des espaces
@@ -92,17 +92,21 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     #VideoPlayer.Plot Complete Text Summary of current playing Video, Résumé
     summary = ""
     #Prend en compte les video de VDR < 1.7.0
-    try:
-        info_file = open('%s/info' % url_file, 'r')
-    except:
-        info_file = open('%s/info.vdr' % url_file, 'r')
+    #print "url_path = ", os.path.join(url_path,'info')
+    if xbmcvfs.exists(os.path.join(url_path,'info')):
+        info_file = xbmcvfs.File(os.path.join(url_path,'info'), 'r')
+    else:
+        info_file = xbmcvfs.File(os.path.join(url_path,'info.vdr'), 'r')
+    #On lit le fichier et on le transforme en liste (\n)
+    info_tab = info_file.read()
+    info_tab = info_tab.split('\n')
     #Mets des valeurs par défaut pour les infos
     realisateur = ' '
     annee = 0
     category = 'CATEGORY'
     acteurs = []
-    for line in info_file:
-        #xbmc.log(msg='INFO_FILE LINE = %s ' % line,level=DEBUG)
+    for line in info_tab:
+        xbmc.log(msg='INFO_FILE LINE = %s ' % line,level=DEBUG)
         if re.search('^E',line):
             heure = line[2:].split(' ')
             time_start = time.gmtime(int(heure[1]))
@@ -156,11 +160,11 @@ def addFile(name, url_file, mode=1, iconimage='icon.png', isProtect=False):
     #print 'Plot = %s' % summary
     li.setProperty('IsPlayable', 'true')
     if isProtect:
-        url_2 = sys.argv[0] + '?url=' + url_file + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
+        url_2 = sys.argv[0] + '?url=' + url_path + '&title=' + name + "&mode=" + str(mode) + "&protect=" + str(isProtect)
         li.setProperty('IsPlayable', 'false')
-        #xbmc.log(msg='URL = %s, url_file => %s ' % (url_2, url_file),level=DEBUG)
+        #xbmc.log(msg='URL = %s, url_path => %s ' % (url_2, url_path),level=DEBUG)
     else:
-        url_2 = getSTACK( url_file )
+        url_2 = getSTACK( url_path )
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url_2,
                                        listitem=li, isFolder=isFolder)
 #Add FOLDER in list
@@ -168,9 +172,11 @@ def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
     ''' Add a folder item to the XBMC UI.'''
     #isFolder=False
     li = xbmcgui.ListItem(name)
+    #Ajoute le type de media (video), le titre du media
     li.setInfo( type="Video", infoLabels={ "Title": name })
+    #recupere l'adresse du fichier
     url = sys.argv[0] + '?url=' + url + '&mode=' + str(mode)
-    #xbmc.log(msg='addDir : url = %s , Titre = %s, Folder = %s' % (url, name, isFolder),level=DEBUG)
+    xbmc.log(msg='addDir : url = %s , Titre = %s, Folder = %s' % (url, name, isFolder),level=DEBUG)
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url,
                                        listitem=li, isFolder=isFolder)
 
