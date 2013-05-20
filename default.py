@@ -169,7 +169,7 @@ def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url_2,
                                        listitem=li, isFolder=isFolder)
 #Add FOLDER in list
-def addDir(name, url='xx', mode=1, iconimage='icon.png', isFolder=False):
+def addDir(name, url='None', mode=1, iconimage='icon.png', isFolder=False):
     ''' Add a folder item to the XBMC UI.'''
     #isFolder=False
     li = xbmcgui.ListItem(name)
@@ -235,13 +235,6 @@ def show_menu(path):
             #Si la protection est True on n'affiche pas les films
             #avec protections.fsk
             if protection:
-#                if 'protection.fsk' in record['files']:
-#                    print "Protect = true"
-#                    isProtect = True
-#                else:
-#                    isProtect = False
-#                    print "Protect = False"
-#                    addFile(name, chemin, 1, "icon.png", isProtect)
                 if 'protection.fsk' not in record['files']:
                     isProtect = False
                     print "Protect = False"
@@ -250,20 +243,12 @@ def show_menu(path):
                 isProtect = False
                 addFile(name, chemin, 1, "icon.png", isProtect)
 
-
-            #CodeParental = True
-            #if CodeParental:
-            #    addFile(name, chemin, 1, "icon.png", isProtect)
-            #elif isProtect:
-            #    pass
-            #else:
-            #    addFile(name, chemin, 1, "icon.png", isProtect)
-
     xbmcplugin.endOfDirectory(handle=int(handle), succeeded=True)
 
 #Debut du programme
 password = __addon__.getSetting('pin')
 protection = True
+protection = __addon__.getSetting( "protection" ) == "true"
 password_ok = True
 # parameter values
 params = parameters_string_to_dict(sys.argv[2])
@@ -275,7 +260,7 @@ handle = sys.argv[1]
 print "PARAMS =>", params
 if not sys.argv[2]:
     # new start
-    if password:
+    if protection:
         #Classe Password pour pb visibilité de touche
         # de la télécommande
         dialog = xbmcgui.Dialog()
@@ -283,6 +268,7 @@ if not sys.argv[2]:
         locstr = __addon__.getLocalizedString(id=40100)
         #Clavier pour ne pas voir le password avec la télécommande
         if KEYBOARD:
+        #Ne fonctionne pas pb au retour de la dialogbox
             dia_pass = Password('DialogNum.xml', __cwd__ ,"Default")
             dia_pass.show()
             pin = dia_pass.password
@@ -304,7 +290,8 @@ if not sys.argv[2]:
             locstr = __addon__.getLocalizedString(id=40101)
             locstr2 = __addon__.getLocalizedString(id=40102)
             #         (" Erreur", " Mauvais code ")
-            dialog.ok(locstr, locstr2)
+            xbmc.executebuiltin("XBMC.Notification(%s : ,%s,30)" % (locstr,locstr2))
+        #dialog.ok(locstr, locstr2)
             params['mode'] = MODE_FOLDER
             protection = True
         else:
@@ -312,65 +299,10 @@ if not sys.argv[2]:
             #xbmc.log(msg='FILE = %s ' % stack,level=DEBUG)
             dialog.ok(locstr, 'Mot de passe OK')
             protection = False
-
+    else:
+        protection = False
     path = __addon__.getSetting('dir')
     ok = show_menu(path)
-elif int(params['mode']) == MODE_FILE:
-    listitem = xbmcgui.ListItem(params['title'])
-    #remplace _ par des espaces
-    titre = params['title'].replace('_',' ')
-    #Permet d'avoir le titre au lieu de 00001.ts
-    listitem.setInfo('video', {'Title': titre})
-    #On vérifie la protection parentale
-    if "True" in params['protect']:
-        #Classe Password pour pb visibilité de touche
-        # de la télécommande
-        dialog = xbmcgui.Dialog()
-                #'Entrez le code parental'
-        locstr = __addon__.getLocalizedString(id=40100)
-        #Clavier pour ne pas voir le password avec la télécommande
-        if KEYBOARD:
-            dia_pass = Password('DialogNum.xml', __cwd__ ,"Default")
-            dia_pass.show()
-            pin = dia_pass.password
-            del dia_pass
-        else:
-            #Clavier virtuel pour mot de passe
-            kb = xbmc.Keyboard('', 'heading', True)
-            kb.setDefault('') # optional
-            kb.setHeading(locstr) # optional
-            kb.setHiddenInput(True) # optional
-            kb.doModal()
-            if (kb.isConfirmed()):
-                pin = kb.getText()
-        #Password défini dans settings.xml
-        password = __addon__.getSetting('pin')
-
-        #Pas le bon MdP
-        if password not in pin:
-            locstr = __addon__.getLocalizedString(id=40101)
-            locstr2 = __addon__.getLocalizedString(id=40102)
-            #         (" Erreur", " Mauvais code ")
-            dialog.ok(locstr, locstr2)
-            params['mode'] = MODE_FOLDER
-        else:
-            #Le MdP est correct on joue la video
-            #xbmc.log(msg='FILE = %s ' % stack,level=DEBUG)
-            url = params['url']
-            #Si plusieurs fichiers ts on les empile (fct stack de xbmc)
-            stack = getSTACK(url)
-            #On rend l'item Playable
-            listitem.setProperty('IsPlayable', 'true')
-            listitem.setPath(stack)
-            #On mets le bon titre
-            listitem.setInfo('video', {'Title': titre})
-            xbmc.Player().play( stack, listitem )
-    else:
-        #Pas de protection on joue direct
-        #Ne sert pas à effacer
-        #xbmc.executebuiltin( "PlayMedia(%s)" % stack )
-        xbmc.log( 'Mon Player',level=DEBUG)
-    xbmc.log(msg='FIN SCRIPT================',level=DEBUG)
 
 #On a selectionné un dossier
 elif int(params['mode']) == MODE_FOLDER:
