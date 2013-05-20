@@ -233,20 +233,31 @@ def show_menu(path, racine='video'):
     for record in listRecords:
         #C'est un répertoire
         if record['Folder']:
-            titres = record['root'].split('/')
+            #titres = record['root'].split('/')
+            #test_head, tail = os.path.split(record['root'])
             print 'record FOLDER = %s' % record
             print "TITRES"
-            print titres
-            print "titres -1 : %s, -2: %s" % (titres[-1], titres[-2])
-            folder = '/'.join(titres[:-1])
-            name = re.sub(r'%|@', '', titres[-2])
-            print "Record folder : %s, name : %s" % (folder,name)
+            #print titres
+            #print "titres -1 : %s, -2: %s" % (titres[-1], titres[-2])
+            #print "head = %s, tail = %s" % (test_head,tail)
+            #folder = '/'.join(titres[:-1])
+            #ex: record['root'] => /home/henri/VDR_videos/NCIS/Alibi
+            #folder => /home/henri/VDR_videos/NCIS/Alibi
+            #name => NCIS
+            folder = os.path.dirname(record['root'])
+            name = os.path.basename(folder)
+            #print "basename = %s" % name
+            #name = re.sub(r'%|@', '', titres[-2])
+            name = re.sub(r'%|@', '', os.path.basename(folder))
+            #print "Record folder : %s, name : %s" % (folder,name)
             addDir(name, folder, mode=10, isFolder=True)
         #C'est un fichier
         else:
             chemin = '%s/%s' % (record['root'], record['dirs'][0])
             chemin = '%s' % (record['root'])
             print "chemin = %s" %chemin
+            chemin = xbmc.translatePath(record['root'])
+            #print 'che_os %s' % che_os
             print "RECORD"
             print record
             titres = record['root'].split('/')
