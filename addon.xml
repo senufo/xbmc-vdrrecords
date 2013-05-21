@@ -23,7 +23,9 @@ Il supporte les fichiers *.ts (version de VDR > 1.7) et les anciens fichiers *.v
 Pour que cela fonctionne correctement avec les anciennes version de VDR il faut ajouter dans advancedsettings.xml
 &lt;videoextensions&gt;
  &lt;add&gt;.vdr&lt; add&gt;
-&lt;videoextensions&gt;
+ &lt;videoextensions&gt;
+
+Maintenant compatible avec FRODO et EDEN
     </description>
   </extension>
 </addon>
