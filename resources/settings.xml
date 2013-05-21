@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
         <category label="General">
-          <setting id="dir" type="folder" label="30102" default="/video/" />
+            <setting id="dir" type="folder" label="30102" default="/video/" />
+            <setting id="exclude" type="text" label="30105" default="vdrconf" />
           <setting id="protection" type= "bool" label ="30104" default ="false" />
           <setting id="pin" type="number" option="hidden" label="30100" default="" />
           <setting type ="sep" />

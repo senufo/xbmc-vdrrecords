@@ -44,6 +44,9 @@ sys.path.append (__resource__)
 
 DEBUG_LEVEL = __addon__.getSetting( "debug" ) == "true"
 KEYBOARD = __addon__.getSetting( "keyboard" ) == "true"
+exclude = __addon__.getSetting( "exclude" )
+exclude_dirs = exclude.split(',')
+print "EXLCUE DIRS", exclude_dirs
 if DEBUG_LEVEL:
     DEBUG_LEVEL = xbmc.LOGDEBUG
 else:
@@ -183,7 +186,6 @@ def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
 #Add FOLDER in list
 def addDir(name, url='None', mode=1, iconimage='icon.png', isFolder=False):
     ''' Add a folder item to the XBMC UI.'''
-    #isFolder=False
     li = xbmcgui.ListItem(name)
     #Ajoute le type de media (video), le titre du media
     li.setInfo( type="Video", infoLabels={ "Title": name })
@@ -232,9 +234,10 @@ def show_menu(path):
                 #Sinon c'est un répertoire
                 files = []
                 scan_dir = os.path.join(path,dir_vdr,dir_rec[0])
-                tree = {'root': scan_dir, 'dirs': scan_dir, 'files': files,
+                if dir_vdr not in exclude_dirs:
+                    tree = {'root': scan_dir, 'dirs': scan_dir, 'files': files,
                                 'Folder': dir_vdr}
-                listRecords.append(tree)
+                    listRecords.append(tree)
         except:
             #Erreur ce n'est pas un répertoire VDR
             print "Unexpected error:", sys.exc_info()[0]

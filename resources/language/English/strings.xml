@@ -9,6 +9,7 @@
     <string id="30102">Directory</string>
     <string id="30103">Keyboard password remote</string>
     <string id="30104">Parental Protection</string>
+    <string id="30105">Exclude directories</string>
   <!-- Script  msg -->
     <string id="40100">Enter the Parental code</string>
     <string id="40101">Error</string>
