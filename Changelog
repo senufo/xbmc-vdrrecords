@@ -1,0 +1,37 @@
+v0.2.2 :
+    Fix error on debug level log
+    Fix stack order for ts or vdr files
+    Add compatibility with XBMC Eden version
+v0.2.1 :
+    Fix notification message for parental code
+    Replace dialogbox with notification builtin function
+    Change control parental protection mode
+v0.2.0 :
+    Remove racine param in Show_Menu function
+    Increase compatibility with os.path and xbmcvfs
+    remove unused walk and explore_tree functions
+    Use translatePath xbmc function instead regex
+    Change print log with xbmc.log
+    Fix duration error in description record
+v0.1.9 :
+    Fix error with empty folder
+v0.1.8 :
+    Move password class to password.py file
+
+v0.1.7 :
+    Fix error when file info empty or wrong/incompletes informations
+    convert _ in space in title, add duration
+    Add infolabel for genre
+    Add infolabel for director, year, actors
+    add DialogNum.xml skin file
+    add keyboard type choice in settings
+
+v0.1.6 :
+    add listitem.setInfo for title with xbmc.Player().play( stack, listitem )
+    Use xbmc.Player().play(stack) instead PlayMedia
+    Return to xbmc.keyboard function for password
+
+v0.1.5 :
+    Add class Password for remote control
+    Change the way to launch the video player file with parental protection
+    Add support vdr files < version 1.7
