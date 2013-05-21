@@ -4,8 +4,8 @@ view vdr records with parental control
 """
 __addonID__      = "plugin.video.vdrrecords"
 __author__       = "Senufo"
-__date__         = "20-05-2013"
-__version__      = "0.2.2"
+__date__         = "21-05-2013"
+__version__      = "0.2.3"
 
 import xbmcplugin
 import xbmcgui
