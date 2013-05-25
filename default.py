@@ -11,6 +11,7 @@ import xbmcplugin
 import xbmcgui
 import xbmcaddon
 import xbmcvfs
+#le module password est devenu inutile
 #import password
 from password import *
 
@@ -166,13 +167,21 @@ def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
             summary = re.sub('\|', '\n', summary)
             #sum_uni = unicode(summary, errors='replace')
     info_file.close()
+    #Essai classement par date
+    #Ajoute le champs DATE dans infolabels
+    match = re.search(".*(\d{4}-\d{2}-\d{2}).*", url_path)
+    if match:
+        Date = match.group(1)
+    else: Date = "Rien"
+    print "addFile date = %s" % Date
     li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary,
                                           'director' : realisateur,
                                           'genre' : category,
                                           'year' : int(annee),
                                           'aired' : aired,
                                           'duration' : duration,
-                                          'cast' : acteurs})
+                                          'cast' : acteurs,
+                                          'Date' : Date})
     #print 'Plot = %s' % summary
     li.setProperty('IsPlayable', 'true')
     if isProtect:
@@ -181,6 +190,7 @@ def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
         #xbmc.log(msg='URL = %s, url_path => %s ' % (url_2, url_path),level=DEBUG_LEVEL)
     else:
         url_2 = getSTACK( url_path )
+    xbmc.log(msg='addFile : url_path = %s , Title = %s, year = %s' % (url_path, name, year),level=DEBUG_LEVEL)
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url_2,
                                        listitem=li, isFolder=isFolder)
 #Add FOLDER in list
@@ -253,6 +263,11 @@ def show_menu(path):
             folder = os.path.dirname(record['root'])
             name = os.path.basename(folder)
             addDir(name, folder, mode=10, isFolder=True)
+            xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_TITLE)
+            xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DATE)
+            #Il faut ajouter les bons infolabel pour les tris ci-dessous
+            #xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_LABEL)
+            #xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_FILE)
         #C'est un fichier
         else:
             chemin = xbmc.translatePath(record['root'])
@@ -360,10 +375,6 @@ if ( __name__ == "__main__" ):
         xbmc.log(msg='sys.arg = %s ' % sys.argv[ 1 ],level=DEBUG_LEVEL)
 
         if password_ok == True:
-            xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ),
-                                     sortMethod=xbmcplugin.SORT_METHOD_LABEL )
-            xbmcplugin.addSortMethod( handle=int( sys.argv[ 1 ] ),
-                                     sortMethod=xbmcplugin.SORT_METHOD_NONE )
             xbmcplugin.endOfDirectory(int(sys.argv[1]))
         else:
             xbmc.log(msg='password_ok = %s ' % password_ok,level=DEBUG_LEVEL)
