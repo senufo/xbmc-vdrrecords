@@ -13,7 +13,7 @@ import xbmcaddon
 import xbmcvfs
 #le module password est devenu inutile
 #import password
-from password import *
+#from password import *
 
 import sys
 import os
