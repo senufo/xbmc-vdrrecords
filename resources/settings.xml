@@ -3,12 +3,11 @@
         <category label="General">
             <setting id="dir" type="folder" label="30102" default="/video/" />
             <setting id="exclude" type="text" label="30105" default="vdrconf" />
-          <setting id="protection" type= "bool" label ="30104" default ="false" />
-          <setting id="pin" type="number" option="hidden" label="30100" default="" />
-          <setting type ="sep" />
-          <setting id="keyboard" type= "bool" label ="30103" default ="false" />
-          <setting type ="sep" />
-          <setting id="debug" type= "bool" label ="30101" default ="false" />
+            <setting id="protection" type= "bool" label ="30104" default ="false" />
+            <setting id="pin" type="number" option="hidden" enable="eq(-1,true)" label="30100" default="" />
+            <setting type ="sep" />
+            <setting id="keyboard" type= "bool" label ="30103" default ="false" />
+            <setting type ="sep" />
+            <setting id="debug" type= "bool" label ="30101" default ="false" />
     </category>
 </settings>
-
