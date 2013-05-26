@@ -9,6 +9,7 @@
     <string id="30102">Répertoire</string>
     <string id="30103">Clavier pour télécommande (mot de passe)</string>
     <string id="30104">Protection parentale (oui/non)</string>
+    <string id="30105">Répertoire(s) à exclure (séparés par une virgule)</string>
   <!-- Script  msg -->
     <string id="40100">Entrez le code parental</string>
     <string id="40101">Erreur</string>
