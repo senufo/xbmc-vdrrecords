@@ -169,9 +169,9 @@ def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
     info_file.close()
     #Essai classement par date
     #Ajoute le champs DATE dans infolabels
-    match = re.search(".*(\d{4}-\d{2}-\d{2}).*", url_path)
+    match = re.search(".*(\d{4})-(\d{2})-(\d{2}).*", url_path)
     if match:
-        Date = match.group(1)
+        Date = "%s.%s.%s" % (match.group(3),match.group(2),match.group(1))
     else: Date = "Rien"
     print "addFile date = %s" % Date
     li.setInfo( type="Video", infoLabels={ "Title": name, 'Plot': summary,
@@ -265,6 +265,8 @@ def show_menu(path):
             addDir(name, folder, mode=10, isFolder=True)
             xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_TITLE)
             xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DATE)
+            xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_DURATION)
+            xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_GENRE)
             #Il faut ajouter les bons infolabel pour les tris ci-dessous
             #xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_LABEL)
             #xbmcplugin.addSortMethod(int(sys.argv[1]), xbmcplugin.SORT_METHOD_FILE)
