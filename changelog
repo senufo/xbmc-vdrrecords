@@ -1,3 +1,9 @@
+v0.2.4 :
+    Fix error sort date and and sort duration and genre
+    Update translation file
+    Enable PIN only if protection active
+    Remove module password
+    Add sort method
 v0.2.3 :
     Add exclude directories option
 v0.2.2 :
