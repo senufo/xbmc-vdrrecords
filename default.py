@@ -120,6 +120,8 @@ def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
     #Mets des valeurs par défaut pour les infos
     realisateur = ' '
     annee = 0
+    aired = ''
+    duration = ''
     category = 'CATEGORY'
     acteurs = []
     for line in info_tab:
@@ -190,7 +192,7 @@ def addFile(name, url_path, mode=1, iconimage='icon.png', isProtect=False):
         #xbmc.log(msg='URL = %s, url_path => %s ' % (url_2, url_path),level=DEBUG_LEVEL)
     else:
         url_2 = getSTACK( url_path )
-    xbmc.log(msg='addFile : url_path = %s , Title = %s, year = %s' % (url_path, name, year),level=DEBUG_LEVEL)
+    xbmc.log(msg='addFile : url_path = %s , Title = %s' % (url_path, name),level=DEBUG_LEVEL)
     return xbmcplugin.addDirectoryItem(handle=int(sys.argv[1]), url=url_2,
                                        listitem=li, isFolder=isFolder)
 #Add FOLDER in list
