@@ -13,7 +13,7 @@ import xbmcaddon
 import xbmcvfs
 #le module password est devenu inutile
 #import password
-#from password import *
+from password import *
 
 import sys
 import os
@@ -314,7 +314,7 @@ if not sys.argv[2]:
         #Ne fonctionne pas pb au retour de la dialogbox
             dia_pass = Password('DialogNum.xml', __cwd__ ,"Default")
             dia_pass.show()
-            pin = dia_pass.password
+            #pin = dia_pass.password
             del dia_pass
         else:
             #Clavier virtuel pour mot de passe
